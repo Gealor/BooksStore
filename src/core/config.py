@@ -11,6 +11,9 @@ class RunConfig(BaseModel):
     host : str = '0.0.0.0'
     port : str = 8000
 
+class ApiPrefixConfig(BaseModel):
+    prefix: str = "/api"
+
 class DatabaseConfig(BaseModel):
     user: str
     password: str
@@ -44,6 +47,7 @@ class Settings(BaseSettings):
 
     run : RunConfig = RunConfig()
     db : DatabaseConfig 
+    api : ApiPrefixConfig = ApiPrefixConfig()
 
 
 
