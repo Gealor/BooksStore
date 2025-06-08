@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models.base import Base
@@ -10,8 +11,8 @@ class Book(IntIdPkMixin, Base):
 
     title : Mapped[str] = mapped_column(nullable = False)
     author : Mapped[str] = mapped_column(nullable = False)
-    publication_year : Mapped[int] = mapped_column(nullable = True)
-    ISBN : Mapped[str] = mapped_column(unique = True, nullable = True)
+    publication_year : Mapped[Optional[int]] = mapped_column(nullable = True)
+    ISBN : Mapped[Optional[str]] = mapped_column(unique = True, nullable = True)
     number_copies : Mapped[int] = mapped_column(default=1, nullable = False)
 
 
