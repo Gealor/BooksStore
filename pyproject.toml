@@ -1,0 +1,32 @@
+[project]
+name = "books"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Gealor",email = "gzazulya@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.11"
+uvicorn = {extras = ["standard"], version = "^0.34.0"}
+pydantic = {extras = ["email"], version = "^2.10.6"}
+pydantic-settings = "^2.8.1"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.39"}
+asyncpg = "^0.30.0"
+alembic = "^1.15.1"
+pyjwt = {extras = ["crypto"], version = "^2.10.1"}
+bcrypt = "^4.3.0"
+python-multipart = "^0.0.20"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
