@@ -18,10 +18,14 @@ class AuthApiPrefixConfig(BaseModel):
 class UsersApiPrefixConfig(BaseModel):
     prefix : str = '/users'
 
+class BooksApiPrefixConfig(BaseModel):
+    prefix : str = '/books'
+
 class ApiPrefixConfig(BaseModel):
     prefix: str = "/api"
     auth : AuthApiPrefixConfig = AuthApiPrefixConfig()
     users : UsersApiPrefixConfig = UsersApiPrefixConfig()
+    books : BooksApiPrefixConfig = BooksApiPrefixConfig()
 
 class AuthJWTConfig(BaseModel):
     private_key_path : Path = BASE_DIR / 'auth' /'certs' / 'jwt-private.pem'
