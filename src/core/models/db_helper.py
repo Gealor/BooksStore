@@ -43,3 +43,11 @@ db_helper = DatabaseHelper(
     pool_size = settings.db.pool_size,
     max_overflow = settings.db.max_overflow,
 )
+
+db_helper_mock = DatabaseHelper(
+    url = settings.db_mock.get_db_url(),
+    echo = settings.db.echo,
+    echo_pool = settings.db.echo_pool,
+    pool_size = settings.db.pool_size,
+    max_overflow = settings.db.max_overflow,
+)
