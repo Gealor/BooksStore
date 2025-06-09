@@ -1,5 +1,6 @@
 from fastapi import Depends, Form, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
 from jwt.exceptions import InvalidTokenError
 
@@ -17,12 +18,13 @@ def validate_auth_user(
     username : str = Form(),
     password : str = Form(),
 ):
+
     unauthed_exc = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail = "Invalid username or password",
     )
 
-    if not (user := auth_crud.get_data_by_username(username)):
+    if not (user := auth_crud.get_data_by_email(username)):
         raise unauthed_exc
     
     if not auth_tools.compare_hashed_passwords(
