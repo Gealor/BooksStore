@@ -1,8 +1,8 @@
-"""create_tables
+"""create_all_tables
 
-Revision ID: acfb9e384cc3
-Revises:
-Create Date: 2025-06-09 07:20:54.977542
+Revision ID: c26f0c0b5aa1
+Revises: f46c96c7c35e
+Create Date: 2025-06-09 11:11:14.460137
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "acfb9e384cc3"
-down_revision: Union[str, None] = None
+revision: str = "c26f0c0b5aa1"
+down_revision: Union[str, None] = "f46c96c7c35e"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -30,6 +30,13 @@ def upgrade() -> None:
         sa.Column("ISBN", sa.String(), nullable=True),
         sa.Column("number_copies", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.CheckConstraint(
+            "number_copies >= 0", name=op.f("ck_books_check_number_copies")
+        ),
+        sa.CheckConstraint(
+            "publication_year > 0 AND publication_year < EXTRACT(YEAR FROM CURRENT_DATE)+1",
+            name=op.f("ck_books_check_publication_year_range"),
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_books")),
         sa.UniqueConstraint("ISBN", name=op.f("uq_books_ISBN")),
     )
