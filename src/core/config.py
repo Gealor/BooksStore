@@ -12,8 +12,22 @@ class RunConfig(BaseModel):
     host : str = '0.0.0.0'
     port : str = 8000
 
+class AuthApiPrefixConfig(BaseModel):
+    prefix : str = '/auth'
+
+class UsersApiPrefixConfig(BaseModel):
+    prefix : str = '/users'
+
 class ApiPrefixConfig(BaseModel):
     prefix: str = "/api"
+    auth : AuthApiPrefixConfig = AuthApiPrefixConfig()
+    users : UsersApiPrefixConfig = UsersApiPrefixConfig()
+
+class AuthJWTConfig(BaseModel):
+    private_key_path : Path = BASE_DIR / 'auth' /'certs' / 'jwt-private.pem'
+    public_key_path : Path = BASE_DIR / 'auth' / 'certs' / 'jwt-public.pem'
+    algorithm : str = "RS256"
+    access_token_expire_minutes : int = 15
 
 class DatabaseConfig(BaseModel):
     user: str
@@ -73,6 +87,7 @@ class Settings(BaseSettings):
     db : DatabaseConfig 
     db_mock : DatabaseMockConfig
     api : ApiPrefixConfig = ApiPrefixConfig()
+    jwt : AuthJWTConfig = AuthJWTConfig()
 
 
 
