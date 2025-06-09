@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 class User(IntIdPkMixin, Base):
     __tablename__ = 'users'
 
+    name : Mapped[str] = mapped_column(nullable=False)
     email : Mapped[str] = mapped_column(unique = True, nullable = False)
     password : Mapped[str] = mapped_column(nullable = False)
     
