@@ -5,22 +5,23 @@ from sqlalchemy.orm import Session
 from core.models import User, db_helper
 from core.schemas.user import UserLoginInfo
 
-def find_user_by_username(
-    username : str,
+def find_user_by_email(
+    email : str,
     session : Session,
 ) -> Tuple[str] | None:
-    stmt = select(User.username).where(User.name == username)
+    stmt = select(User.email).where(User.email == email)
 
     result = session.execute(stmt)
 
     return result.first()
 
 
-def get_data_by_username(
+def get_data_by_email(
     username : str,
 ) -> UserLoginInfo | None:
     with db_helper.session_factory() as session:
-        stmt = select(User).where(User.name == username)
+        stmt = select(User).where(User.email == username)
         result = session.scalar(stmt)
+        print(result)
 
     return result
