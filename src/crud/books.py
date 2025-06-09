@@ -1,10 +1,13 @@
 from typing import Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload, Session
+from sqlalchemy.exc import DatabaseError
 
 from auth import tools as auth_tools
 from core.models import Book
 from core.schemas.books import BookCreate, BookRead
+from core.schemas.exceptions import InvalidDataError
+
 
 
 
@@ -22,7 +25,6 @@ def get_book_by_id(
 ) -> BookRead | None:
     stmt = select(Book).where(Book.id == book_id)
     result = session.scalar(stmt)
-
     return result
 
 def get_books_by_name(
@@ -44,13 +46,17 @@ def get_books_by_author(
     return result.all()
 
 def create_book(
-    user_create : BookCreate,
+    book_create : BookCreate,
     session : Session,
 ) -> BookRead:
     
-    book = Book(**user_create.model_dump())
+    book = Book(**book_create.model_dump())
     session.add(book)
-    session.commit()
+    try:
+        session.commit()
+    except DatabaseError as e:
+        session.rollback()
+        raise InvalidDataError
     session.refresh(book)
     return book
 
@@ -74,6 +80,8 @@ def update_book_data(
 ) -> None:
     for key, value in new_data.items():
         setattr(book, key, value)
-        
-    session.commit()
-
+    try:
+        session.commit()
+    except DatabaseError:
+        session.rollback()
+        raise InvalidDataError
