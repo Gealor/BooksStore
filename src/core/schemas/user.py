@@ -14,10 +14,16 @@ class UserRead(UserBase):
 class UserCreate(UserBase):
     password : str
 
+class UserLoginInfo(UserRead):
+    password : str
+
 class UserUpdate(UserCreate):
     name : Optional[str] = None
     email : Optional[EmailStr] = None
     password : Optional[str] = None
 
+
 class UserDelete(BaseModel):
     deleted : int
+
+
