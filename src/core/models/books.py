@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Optional
+from sqlalchemy import CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models.base import Base
@@ -18,5 +19,16 @@ class Book(IntIdPkMixin, Base):
     number_copies : Mapped[int] = mapped_column(default=1, nullable = False)
 
     borrowed_books : Mapped[list['BorrowedBook']] = relationship(back_populates="book", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        CheckConstraint(
+            'publication_year > 0 AND publication_year < EXTRACT(YEAR FROM CURRENT_DATE)+1',
+            name = 'check_publication_year_range',
+        ),
+        CheckConstraint(
+            'number_copies >= 0',
+            name = 'check_number_copies',
+        )
+    )
 
 
