@@ -1,5 +1,6 @@
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, async_sessionmaker, AsyncSession
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import sessionmaker
 
 from core.config import settings
 
@@ -12,7 +13,7 @@ class DatabaseHelper:
             pool_size: int = 5,
             max_overflow: int = 10,
     ):
-        self.engine: AsyncEngine = create_async_engine(
+        self.engine: Engine = create_engine(
             url = url,
             echo = echo,
             echo_pool = echo_pool,
@@ -20,7 +21,7 @@ class DatabaseHelper:
             max_overflow = max_overflow,
         )
         
-        self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
+        self.session_factory: sessionmaker = sessionmaker(
             bind = self.engine,
             autoflush = False,
             autocommit = False,
@@ -28,12 +29,12 @@ class DatabaseHelper:
         )
     
     # асинхронное отключение соединения от базы данных
-    async def dispose(self):
-        await self.engine.dispose()
+    def dispose(self):
+        self.engine.dispose()
 
     # получение сессии
-    async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
-        async with self.session_factory() as session:
+    def session_getter(self):
+       with self.session_factory() as session:
             yield session
 
 db_helper = DatabaseHelper(
