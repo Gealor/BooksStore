@@ -30,7 +30,6 @@ def update_user(
     new_data : UserUpdate,
     session : Annotated[Session, Depends(db_helper.session_getter)],
     user : UserRead = Depends(get_current_active_auth_user),
-    
 ) -> UserUpdate:
     id = int(user.id)
 
@@ -44,8 +43,29 @@ def update_user(
 def delete_user(
     user_id : int,
     session : Annotated[Session, Depends(db_helper.session_getter)],
+    user : UserRead = Depends(get_current_active_auth_user)
 ) -> UserDelete:
+    if user.id == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail = "You cannot delete yourself, use /delete-me"
+        )
     deleted_id = users_crud.delete_user_by_id(user_id, session)
+    if deleted_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail = "User not found",
+        )
+    return {
+        "deleted" : deleted_id,
+    }
+
+@router.delete('/delete-me')
+def delete_self(
+    session : Annotated[Session, Depends(db_helper.session_getter)],
+    user : UserRead = Depends(get_current_active_auth_user)
+)-> UserDelete:
+    deleted_id = users_crud.delete_user_by_id(user.id, session)
     return {
         "deleted" : deleted_id,
     }
