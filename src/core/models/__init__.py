@@ -5,7 +5,7 @@ __all__ = (
     "Book"
 )
 
-from .db_helper import db_helper
+from .db_helper import db_helper, db_helper_mock
 from .base import Base
 from .users import User
 from .books import Book
