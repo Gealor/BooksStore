@@ -36,7 +36,7 @@ class DatabaseConfig(BaseModel):
     } # чтобы имена ограничений также учитывались alembic миграциями
     
     def get_db_url(self):
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
+        return f"postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
     
 class DatabaseMockConfig(BaseModel):
     user: str
@@ -59,7 +59,7 @@ class DatabaseMockConfig(BaseModel):
     } # чтобы имена ограничений также учитывались alembic миграциями
     
     def get_db_url(self):
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
+        return f"postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
