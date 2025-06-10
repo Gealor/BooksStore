@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload, Session
 
 from auth import tools as auth_tools
 from core.models import User, db_helper
-from core.schemas.user import UserCreate, UserRead
+from core.schemas.users import UserCreate, UserRead
 
 
 def get_all_users(

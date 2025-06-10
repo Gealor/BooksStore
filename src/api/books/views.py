@@ -7,7 +7,7 @@ from api.auth.tools.tools_auth import get_current_active_auth_user
 from core.config import settings
 from core.models import db_helper
 from core.schemas.exceptions import InvalidDataError
-from core.schemas.user import UserRead
+from core.schemas.users import UserRead
 from crud import books as books_crud
 from core.schemas.books import BookCreate, BookDelete, BookRead, BookUpdate
 

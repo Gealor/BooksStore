@@ -1,4 +1,4 @@
-from core.schemas.user import UserRead
+from core.schemas.users import UserRead
 from auth import tools as auth_tools
 from core.config import settings
 

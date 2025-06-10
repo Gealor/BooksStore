@@ -7,7 +7,7 @@ from api.auth.tools import tools_auth
 from api.auth.tools import creation_tokens
 from core.models import db_helper
 from core.schemas.auth_info import TokenInfo
-from core.schemas.user import UserBase, UserCreate, UserRead
+from core.schemas.users import UserBase, UserCreate, UserRead
 from crud import users as users_crud
 from auth import tools as auth_tools
 from core.config import settings

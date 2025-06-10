@@ -7,7 +7,7 @@ from api.auth.tools.tools_auth import get_current_active_auth_user
 from core.models import db_helper
 from core.schemas.books import BookRead
 from core.schemas.borrowed_books import BorrowedBookInfo, BorrowedBookWithDate
-from core.schemas.user import UserBase, UserDelete, UserRead, UserUpdate
+from core.schemas.users import UserBase, UserDelete, UserRead, UserUpdate
 from core.config import settings
 from crud import users as users_crud
 from crud import borrowed_books as bb_crud

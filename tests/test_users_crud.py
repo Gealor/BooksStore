@@ -4,7 +4,7 @@
 '''
 from sqlalchemy import text
 
-from core.schemas.user import UserCreate
+from core.schemas.users import UserCreate
 from crud import users as users_crud
 from core.models.db_helper import db_helper_mock
 

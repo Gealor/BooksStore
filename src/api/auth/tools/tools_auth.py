@@ -5,7 +5,7 @@ from jwt.exceptions import InvalidTokenError
 
 from api.auth.tools.creation_tokens import ACCESS_TOKEN_TYPE, REFRESH_TOKEN_TYPE, TOKEN_TYPE_FIELD
 from core.models import db_helper
-from core.schemas.user import UserRead
+from core.schemas.users import UserRead
 from crud import auth as auth_crud
 from crud import users as users_crud
 from auth import tools as auth_tools

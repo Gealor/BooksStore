@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.models import User, db_helper
-from core.schemas.user import UserLoginInfo
+from core.schemas.users import UserLoginInfo
 
 def find_user_by_email(
     email : str,
