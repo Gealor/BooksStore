@@ -1,8 +1,10 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 
-from api.auth.tools.tools_auth import get_current_active_auth_user, validate_auth_user
+from api.auth.tools import tools_auth
+from api.auth.tools import creation_tokens
 from core.models import db_helper
 from core.schemas.auth_info import TokenInfo
 from core.schemas.user import UserBase, UserCreate, UserRead
@@ -10,11 +12,10 @@ from crud import users as users_crud
 from auth import tools as auth_tools
 from core.config import settings
 
-
 router = APIRouter(
     prefix = settings.api.auth.prefix,
     tags = ["JWT"]
-    )
+)
 
 @router.post('/register')
 def create_user(
@@ -26,17 +27,20 @@ def create_user(
 
 @router.post('/login')
 def auth_user_jwt(
-    user : UserRead = Depends(validate_auth_user)
+    user : UserRead = Depends(tools_auth.validate_auth_user)
 ) -> TokenInfo:
-    jwt_payload = {
-        "sub" : str(user.id),
-        "name" : user.name,
-        "email" : user.email,
-    }
-    access_token = auth_tools.encode_jwt(payload = jwt_payload)
+    access_token = creation_tokens.create_access_token(user)
+    refresh_token = creation_tokens.create_refresh_token(user)
     return TokenInfo(
         access_token = access_token,
-        token_type = "Bearer",
+        refresh_token = refresh_token,
     )
 
-
+@router.post('/refresh', response_model_exclude_none=True)
+def refresh_jwt(
+    user : UserRead = Depends(tools_auth.get_current_active_auth_user_for_refresh),
+) -> TokenInfo:
+    access_token = creation_tokens.create_access_token(user)
+    return TokenInfo(
+        access_token = access_token,
+    )
