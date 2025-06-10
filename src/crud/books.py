@@ -13,7 +13,7 @@ from core.schemas.exceptions import InvalidDataError
 
 def get_all_books(
     session : Session,
-) -> Sequence[BookRead]:
+) -> Sequence[Book]:
     stmt = select(Book).order_by(Book.id)
 
     result = session.scalars(stmt)
@@ -22,7 +22,7 @@ def get_all_books(
 def get_book_by_id(
     book_id : int,
     session : Session,
-) -> BookRead | None:
+) -> Book| None:
     stmt = select(Book).where(Book.id == book_id)
     result = session.scalar(stmt)
     return result
@@ -30,25 +30,34 @@ def get_book_by_id(
 def get_books_by_name(
         book_name : str, 
         session : Session,
-) -> Sequence[BookRead] | BookRead | None:
+) -> Sequence[Book] | Book | None:
     stmt = select(Book).where(Book.title == book_name)
     result = session.scalars(stmt)
 
-    return result.all() if len(result)>1 else result.first()
+    return result.all()
 
 def get_books_by_author(
     author : str,
     session : Session,
-) -> Sequence[BookRead]:
+) -> Sequence[Book]:
     stmt = select(Book).where(Book.author == author)
     result = session.scalars(stmt)
 
     return result.all()
 
+def get_books_by_isbn(
+    isbn : str,
+    session : Session,
+) -> Book | None:
+    stmt = select(Book).where(Book.ISBN == isbn)
+    result = session.scalar(stmt)
+
+    return result
+
 def create_book(
     book_create : BookCreate,
     session : Session,
-) -> BookRead:
+) -> Book:
     
     book = Book(**book_create.model_dump())
     session.add(book)
@@ -57,7 +66,6 @@ def create_book(
     except DatabaseError as e:
         session.rollback()
         raise InvalidDataError
-    session.refresh(book)
     return book
 
 def delete_book_by_id(
@@ -85,3 +93,5 @@ def update_book_data(
     except DatabaseError:
         session.rollback()
         raise InvalidDataError
+
+

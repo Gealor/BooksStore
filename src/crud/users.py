@@ -9,7 +9,7 @@ from core.schemas.user import UserCreate, UserRead
 
 def get_all_users(
     session : Session,
-) -> Sequence[UserRead]:
+) -> Sequence[User]:
     stmt = select(User).order_by(User.id)
 
     result = session.scalars(stmt)
@@ -18,7 +18,7 @@ def get_all_users(
 def get_user_by_id(
     user_id : int,
     session : Session,
-) -> UserRead | None:
+) -> User | None:
     stmt = select(User).where(User.id == user_id)
     result = session.scalar(stmt)
 
@@ -27,13 +27,12 @@ def get_user_by_id(
 def create_user(
     user_create : UserCreate,
     session : Session,
-) -> UserRead:
+) -> User:
     user_create.password = auth_tools.hash_password(user_create.password).decode('utf-8')
     
     user = User(**user_create.model_dump())
     session.add(user)
     session.commit()
-    session.refresh(user)
     return user
 
 def delete_user_by_id(
