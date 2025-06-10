@@ -44,6 +44,10 @@ class AuthJWTConfig(BaseModel):
     def get_refresh_minutes_from_days(self) -> int:
         return 24*60*self.refresh_token_expire_days
 
+class ValidationConfig(BaseModel):
+    min_len_password : int = 5
+    max_len_password : int = 30
+
 class DatabaseConfig(BaseModel):
     user: str
     password: str
@@ -104,7 +108,7 @@ class Settings(BaseSettings):
     api : ApiPrefixConfig = ApiPrefixConfig()
     jwt : AuthJWTConfig = AuthJWTConfig()
     business : BusinessConditionsConfig = BusinessConditionsConfig()
-
+    validation : ValidationConfig = ValidationConfig() # вспомогательные настройки для валидации, в данном случае для валидации пароля
 
 
 settings = Settings()
