@@ -15,7 +15,8 @@ security = HTTPBasic()
 oauth2_schema = OAuth2PasswordBearer(tokenUrl = '/api/auth/login')
 
 def validate_auth_user(
-    username : str = Form(),
+    username : str = Form(description="Enter the email you used to register."), # указывается именно username из-за особенности реализации OAuth2PasswordBearer, который использует OAuth2PasswordRequestForm в качестве зависимости,
+    # внутри же OAuth2PasswordRequestForm содержит поля username и password и никаких других 
     password : str = Form(),
 ):
 
