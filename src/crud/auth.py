@@ -22,6 +22,5 @@ def get_data_by_email(
     with db_helper.session_factory() as session:
         stmt = select(User).where(User.email == username)
         result = session.scalar(stmt)
-        print(result)
 
     return result
