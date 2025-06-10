@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, Field
 from core.config import settings
 
 class UserBase(BaseModel):
-    name : str = Field(min_length=2)
+    name : str = Field(min_length=settings.validation.min_len_name)
     email : EmailStr
 
 class UserRead(UserBase):
