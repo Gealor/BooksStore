@@ -27,3 +27,9 @@ class BookUpdate(BaseModel):
 
 class BookDelete(BaseModel):
     deleted : int
+
+class BookInfo(BaseModel):
+    title : str
+    author : str
+    ISBN : Optional[str] = None
+    publication_year : Optional[int] = None
