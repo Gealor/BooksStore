@@ -17,6 +17,7 @@ def test_create_books():
         title = "1984",
         author = "George Orwe",
         publication_year=1949,
+        ISBN = "34521fghnbf",
         number_copies=4,
     )
     with db_helper_mock.session_factory() as session:
@@ -31,6 +32,30 @@ def test_create_books():
 def test_get_all_books():
     with db_helper_mock.session_factory() as session:
         result = books_crud.get_all_books(session)
+
+    assert result is not None
+
+def test_get_book_by_id():
+    with db_helper_mock.session_factory() as session:
+        result = books_crud.get_book_by_id(1, session)
+    
+    assert result is not None
+
+def test_get_book_by_title():
+    with db_helper_mock.session_factory() as session:
+        result = books_crud.get_books_by_name("1984", session)
+    
+    assert result is not None
+
+def test_get_book_by_author():
+    with db_helper_mock.session_factory() as session:
+        result = books_crud.get_books_by_author("George Orwe", session)
+
+    assert result is not None
+
+def test_get_book_by_isbn():
+    with db_helper_mock.session_factory() as session:
+        result = books_crud.get_books_by_isbn("34521fghnbf", session)
 
     assert result is not None
 
