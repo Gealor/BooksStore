@@ -21,11 +21,18 @@ class UsersApiPrefixConfig(BaseModel):
 class BooksApiPrefixConfig(BaseModel):
     prefix : str = '/books'
 
+class BusinessApiPrefixConfig(BaseModel):
+    prefix : str = '/business'
+
+class BusinessConditionsConfig(BaseModel):
+    max_active_books : int = 3
+
 class ApiPrefixConfig(BaseModel):
     prefix: str = "/api"
     auth : AuthApiPrefixConfig = AuthApiPrefixConfig()
     users : UsersApiPrefixConfig = UsersApiPrefixConfig()
     books : BooksApiPrefixConfig = BooksApiPrefixConfig()
+    business : BusinessApiPrefixConfig = BusinessApiPrefixConfig()
 
 class AuthJWTConfig(BaseModel):
     private_key_path : Path = BASE_DIR / 'auth' /'certs' / 'jwt-private.pem'
@@ -92,6 +99,7 @@ class Settings(BaseSettings):
     db_mock : DatabaseMockConfig
     api : ApiPrefixConfig = ApiPrefixConfig()
     jwt : AuthJWTConfig = AuthJWTConfig()
+    business : BusinessConditionsConfig = BusinessConditionsConfig()
 
 
 
