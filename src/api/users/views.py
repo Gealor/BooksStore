@@ -1,13 +1,16 @@
 
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Sequence
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.auth.tools.tools_auth import get_current_active_auth_user
 from core.models import db_helper
+from core.schemas.books import BookRead
+from core.schemas.borrowed_books import BorrowedBookInfo, BorrowedBookWithDate
 from core.schemas.user import UserBase, UserDelete, UserRead, UserUpdate
 from core.config import settings
 from crud import users as users_crud
+from crud import borrowed_books as bb_crud
 
 
 router = APIRouter(
@@ -16,13 +19,31 @@ router = APIRouter(
     )
 
 @router.get('/me')
-async def auth_user_check_self_info(
+def auth_user_check_self_info(
     user : UserRead = Depends(get_current_active_auth_user)
 ) -> UserBase:
     return {
         "name" : user.name,
         "email" : user.email,
     }
+
+@router.get('/my-books')
+def get_my_active_books(
+    session : Annotated[Session, Depends(db_helper.session_getter)],
+    user : UserRead = Depends(get_current_active_auth_user)
+) -> Sequence[BorrowedBookInfo]:
+    result = bb_crud.get_active_borrowed_books_by_user_id(user.id, session)
+
+    return result
+
+@router.get('/history')
+def get_history_books(
+    session : Annotated[Session, Depends(db_helper.session_getter)],
+    user : UserRead = Depends(get_current_active_auth_user),
+) -> Sequence[BorrowedBookWithDate]:
+    result = bb_crud.get_history_about_books_by_user_id(user.id, session)
+
+    return result
 
 
 @router.patch('/update-info')
