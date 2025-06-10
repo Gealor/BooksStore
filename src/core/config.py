@@ -39,6 +39,10 @@ class AuthJWTConfig(BaseModel):
     public_key_path : Path = BASE_DIR / 'auth' / 'certs' / 'jwt-public.pem'
     algorithm : str = "RS256"
     access_token_expire_minutes : int = 15
+    refresh_token_expire_days : int = 30
+    
+    def get_refresh_minutes_from_days(self) -> int:
+        return 24*60*self.refresh_token_expire_days
 
 class DatabaseConfig(BaseModel):
     user: str
