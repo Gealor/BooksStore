@@ -14,10 +14,11 @@ if TYPE_CHECKING:
 class BorrowedBook(IntIdPkMixin, Base):
     __tablename__ = 'borrowed_books'
 
-    book_id : Mapped[int] = mapped_column(ForeignKey("users.id", ondelete='CASCADE'), nullable = False)
-    reader_id : Mapped[int] = mapped_column(ForeignKey("books.id", ondelete='CASCADE'), nullable = False)
+    book_id : Mapped[int] = mapped_column(ForeignKey("books.id", ondelete='CASCADE'), nullable = False)
+    reader_id : Mapped[int] = mapped_column(ForeignKey("users.id", ondelete='CASCADE'), nullable = False)
     return_date : Mapped[Optional[datetime]] = mapped_column(nullable=True)
-    borrow_date : Mapped[datetime] = mapped_column(default = datetime.now(), server_default="now()", nullable = False)
+    # передаю саму функцию now, а не результат ее вызова now(), т.к. значение по умолчанию определяется в момент определения класса
+    borrow_date : Mapped[datetime] = mapped_column(default = datetime.now, server_default="now()", nullable = False)
 
     user : Mapped["User"] = relationship(back_populates='borrowed_books')
     book : Mapped["Book"] = relationship(back_populates='borrowed_books')
