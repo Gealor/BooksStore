@@ -47,6 +47,12 @@ class AuthJWTConfig(BaseModel):
 class ValidationConfig(BaseModel):
     min_len_password : int = 5
     max_len_password : int = 30
+    min_len_name : int = 2
+    
+    min_len_title : int = 1
+    len_ISBN : int = 13
+
+
 
 class DatabaseConfig(BaseModel):
     user: str
