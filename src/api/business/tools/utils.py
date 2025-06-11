@@ -7,6 +7,13 @@ from crud import borrowed_books as bb_crud
 from crud import books as books_crud
 from core.config import settings
 
+def check_availability_book(record, user_id) -> None:
+    if record.reader_id!=user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Book not found in your library",
+        )
+
 def check_record_found(record) -> None:
     if record is None:
         raise HTTPException(
@@ -39,6 +46,9 @@ def check_return_book(record) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Book already return",
         )
+
+
+
 
 def reduce_number_of_copies(
     book : Book,
