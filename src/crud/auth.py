@@ -18,9 +18,9 @@ def find_user_by_email(
 
 def get_data_by_email(
     username : str,
+    session : Session,
 ) -> UserLoginInfo | None:
-    with db_helper.session_factory() as session:
-        stmt = select(User).where(User.email == username)
-        result = session.scalar(stmt)
+    stmt = select(User).where(User.email == username)
+    result = session.scalar(stmt)
 
     return result
