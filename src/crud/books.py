@@ -7,9 +7,8 @@ from auth import tools as auth_tools
 from core.models import Book
 from core.schemas.books import BookCreate, BookRead
 from core.schemas.exceptions import InvalidDataError
-
-
-
+from core.models.borrowed_books import BorrowedBook
+from core.models.users import User
 
 def get_all_books(
     session : Session,
@@ -72,13 +71,24 @@ def delete_book_by_id(
     book_id : int,
     session : Session,
 ) -> int | None:
-    stmt = select(Book).options(selectinload(Book.borrowed_books)).where(Book.id == book_id)
-    result = session.execute(stmt)
-    user = result.scalar_one_or_none()
-    if user:
-        session.delete(user)
+    stmt = select(Book).where(Book.id == book_id)
+    result = session.scalars(stmt)
+    book = result.one_or_none()
+    # def debug_session_objects(session):
+    #     print("Session contains:")
+    #     for obj in session.identity_map.values():
+    #         if isinstance(obj, User):
+    #             print("  User in session:", obj.id, "Borrowed books:", [bb.id for bb in obj.borrowed_books])
+    #         elif isinstance(obj, Book):
+    #             print("  Book in session:", obj.id)
+    #         elif isinstance(obj, BorrowedBook):
+    #             print("  BorrowedBook in session:", obj.id, "book_id:", obj.book_id, "reader_id:", obj.reader_id)
+
+    if book:
+        session.delete(book)
+        # debug_session_objects(session)
         session.commit()
-    return user.id if user else None
+    return book.id if book else None
     
 
 def update_book_data(
