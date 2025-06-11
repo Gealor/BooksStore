@@ -19,6 +19,7 @@ def validate_auth_user(
     username : str = Form(description="Enter the email you used to register."), # указывается именно username из-за особенности реализации OAuth2PasswordBearer, который использует OAuth2PasswordRequestForm в качестве зависимости,
     # внутри же OAuth2PasswordRequestForm содержит поля username и password и никаких других 
     password : str = Form(),
+    session : Session = Depends(db_helper.session_getter),
 ):
 
     unauthed_exc = HTTPException(
@@ -26,7 +27,7 @@ def validate_auth_user(
         detail = "Invalid username or password",
     )
 
-    if not (user := auth_crud.get_data_by_email(username)):
+    if not (user := auth_crud.get_data_by_email(username, session)):
         raise unauthed_exc
     
     if not auth_tools.compare_hashed_passwords(
