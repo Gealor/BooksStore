@@ -129,6 +129,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.mock
 .venv
 env/
 venv/
