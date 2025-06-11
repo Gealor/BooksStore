@@ -15,4 +15,4 @@ class User(IntIdPkMixin, Base):
     email : Mapped[str] = mapped_column(unique = True, nullable = False)
     password : Mapped[str] = mapped_column(nullable = False)
     
-    borrowed_books : Mapped[list["BorrowedBook"]] = relationship(back_populates="user", cascade = 'all, delete-orphan')
+    borrowed_books : Mapped[list["BorrowedBook"]] = relationship(back_populates="user", cascade = "all")
