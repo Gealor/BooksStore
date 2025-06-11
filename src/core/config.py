@@ -51,6 +51,7 @@ class ValidationConfig(BaseModel):
     
     min_len_title : int = 1
     len_ISBN : int = 13
+    max_len_description : int = 500
 
 
 
