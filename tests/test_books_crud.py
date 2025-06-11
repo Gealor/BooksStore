@@ -1,23 +1,16 @@
+from pydantic import ValidationError
+import pytest
 from sqlalchemy import text
-from core.schemas.books import BookCreate
+from core.schemas.books import BookCreate, BookUpdate
 from crud import books as books_crud
 from core.models.db_helper import db_helper_mock
 
-def clear_table_users(session):
-    session.execute(text("TRUNCATE books CASCADE;"))
-    session.execute(text("ALTER SEQUENCE books_id_seq RESTART WITH 1;"))
-    session.commit()
-
-with db_helper_mock.session_factory() as session:
-    clear_table_users(session)
-
-
-def test_create_books():
+def test_create_book():
     book = BookCreate(
-        title = "1984",
-        author = "George Orwe",
-        publication_year=1949,
-        ISBN = "34521fghnbf",
+        title = "Билли Саммерс",
+        author = "Стивен Кинг",
+        publication_year=2021,
+        ISBN = "123456789abcd",
         number_copies=4,
     )
     with db_helper_mock.session_factory() as session:
@@ -26,8 +19,8 @@ def test_create_books():
             session,
         )
 
-        assert result.title == "1984"
-        assert result.author == 'George Orwe'
+        assert result.title == "Билли Саммерс"
+        assert result.author == "Стивен Кинг"
 
 def test_get_all_books():
     with db_helper_mock.session_factory() as session:
@@ -49,28 +42,44 @@ def test_get_book_by_title():
 
 def test_get_book_by_author():
     with db_helper_mock.session_factory() as session:
-        result = books_crud.get_books_by_author("George Orwe", session)
+        result = books_crud.get_books_by_author("Джордж Оруэлл", session)
 
     assert result is not None
 
 def test_get_book_by_isbn():
     with db_helper_mock.session_factory() as session:
-        result = books_crud.get_books_by_isbn("34521fghnbf", session)
+        result = books_crud.get_books_by_isbn("123456789abcd", session)
 
     assert result is not None
 
 def test_update_books_by_id():
     with db_helper_mock.session_factory() as session:
-        user = books_crud.get_book_by_id(1, session)
+        book = books_crud.get_book_by_id(1, session)
 
-        assert user is not None
+        assert book is not None
 
-        new_data = {
-            "number_copies" : 2,
-            "publication_year" : 1948
-        }
+        book_update = BookUpdate(
+            number_copies = 2,
+            publication_year = 1948,
+        )
+        new_data = book_update.model_dump(exclude_unset=True)
 
-        books_crud.update_book_data(user, new_data, session)
+        books_crud.update_book_data(book, new_data, session)
+
+def test_invalid_update_book():
+    with pytest.raises(ValidationError):
+        with db_helper_mock.session_factory() as session:
+            book = books_crud.get_book_by_id(1, session)
+
+            assert book is not None
+
+            book_update = BookUpdate(
+                number_copies = -2,
+                publication_year = -2,
+            )
+            new_data = book_update.model_dump(exclude_unset=True)
+
+            books_crud.update_book_data(book, new_data, session)
 
 
 def test_delete_books():
