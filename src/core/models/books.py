@@ -17,6 +17,7 @@ class Book(IntIdPkMixin, Base):
     publication_year : Mapped[Optional[int]] = mapped_column(nullable = True)
     ISBN : Mapped[Optional[str]] = mapped_column(unique = True, nullable = True)
     number_copies : Mapped[int] = mapped_column(default=1, nullable = False)
+    description : Mapped[str] = mapped_column(default="...", server_default="...", nullable=True)
 
     borrowed_books : Mapped[list['BorrowedBook']] = relationship(back_populates="book", cascade="all, delete-orphan")
 
