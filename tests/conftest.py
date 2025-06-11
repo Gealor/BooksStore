@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import text
 from core.schemas.books import BookCreate
 from core.schemas.users import UserCreate
-from core.models import db_helper_mock
+from core.models import db_helper_mock, db_helper
 from crud import users as users_crud
 from crud import books as books_crud
 
@@ -88,10 +88,12 @@ def fill_and_clear_databases():
                 session,
             )
     yield 
+    pass
     with db_helper_mock.session_factory() as session:
-        session.execute(text("TRUNCATE users, books CASCADE;"))
+        session.execute(text("TRUNCATE users, books, borrowed_books CASCADE;"))
         session.execute(text("ALTER SEQUENCE users_id_seq RESTART WITH 1;"))
         session.execute(text("ALTER SEQUENCE books_id_seq RESTART WITH 1;"))
+        session.execute(text("ALTER SEQUENCE borrowed_books_id_seq RESTART WITH 1;"))
         session.commit()
 
 
