@@ -85,3 +85,7 @@ def test_invalid_update_book():
 def test_delete_books():
     with db_helper_mock.session_factory() as session:
         result = books_crud.delete_book_by_id(1, session)
+        
+def test_delete_books_2():
+    with db_helper_mock.session_factory() as session:
+        result = books_crud.delete_book_by_id(2, session)
