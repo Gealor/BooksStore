@@ -51,9 +51,9 @@ def return_book(
     user : UserRead = Depends(get_current_active_auth_user),
 ) -> BorrowedBookUpdate:
     record = bb_crud.get_borrowed_book_by_id(borrowed_id, session)
-    book_id = record.book_id
     try:
         utils.check_record_found(record)
+        book_id = record.book_id
         utils.check_availability_book(record, user.id)
         utils.check_return_book(record)
     except HTTPException as e:
