@@ -22,7 +22,7 @@ def lending_book(
     book_id : int,
     session : Annotated[Session, Depends(db_helper.session_getter)],
     user : UserRead = Depends(get_current_active_auth_user),
-) -> BorrowedBookCreate:
+) -> BorrowedBookRead:
     book = books_crud.get_book_by_id(book_id, session)
     user_id = user.id
     try:
@@ -54,6 +54,7 @@ def return_book(
     book_id = record.book_id
     try:
         utils.check_record_found(record)
+        utils.check_availability_book(record, user.id)
         utils.check_return_book(record)
     except HTTPException as e:
         raise e
