@@ -20,17 +20,5 @@ def create_database():
     cur.close()
     conn.close()
     
-
-def drop_all_mock_table():
-    Base.metadata.drop_all(bind=db_helper.engine)
-    print("Тестовые таблицы сброшены")
-
-def create_all_mock_tables():
-    Base.metadata.create_all(bind=db_helper.engine)
-    print("Тестовые таблицы созданы")
-
-
 if __name__=="__main__":
     create_database()
-    drop_all_mock_table()
-    create_all_mock_tables()
