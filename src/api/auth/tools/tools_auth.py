@@ -1,7 +1,7 @@
 from fastapi import Depends, Form, HTTPException, status
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 
 from api.auth.tools.creation_tokens import ACCESS_TOKEN_TYPE, REFRESH_TOKEN_TYPE, TOKEN_TYPE_FIELD
 from core.models import db_helper
@@ -43,6 +43,11 @@ def get_jwt_token(
 ) -> dict:
     try:
         payload = auth_tools.decode_jwt(jwt_token=token)
+    except ExpiredSignatureError as e: # ExpiredSignatureError наследуется от ошибки InvalidTokenError
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired."
+        )
     except InvalidTokenError as e: # может быть такое что токен содержит меньше сегментов в payload чем расчитано
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
