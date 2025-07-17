@@ -2,13 +2,64 @@ from typing import Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import DatabaseError
+from typing import Protocol
 
 from core.models import Book
 from core.schemas.books import BookCreate
 from core.schemas.exceptions import InvalidDataError
 
+class BookRepositoryAbstract(Protocol):
+    def get_all_books(
+        self,
+        session : Session,
+    ) -> Sequence[Book]:
+        pass
 
-class BookRepository:
+    def get_book_by_id(
+        self,
+        book_id : int,
+    ) -> Book| None:
+        pass
+
+    def get_books_by_name(
+        self,
+        book_name : str, 
+    ) -> Sequence[Book] | Book | None:
+        pass
+
+    def get_books_by_author(
+        self,
+        author : str,
+    ) -> Sequence[Book]:
+        pass
+
+    def get_books_by_isbn(
+        self,
+        isbn : str,
+    ) -> Book | None:
+        pass
+
+    def create_book(
+        self,
+        book_create : BookCreate,
+    ) -> Book:
+        pass
+
+    def delete_book_by_id(
+        self,
+        book_id : int,
+    ) -> int | None:
+        pass
+        
+    def update_book_data(
+        self,
+        book : Book,
+        new_data : dict,
+    ) -> None:
+        pass
+
+
+class BookRepository(BookRepositoryAbstract):
     def __init__(self, session: Session):
         self._session = session
 
