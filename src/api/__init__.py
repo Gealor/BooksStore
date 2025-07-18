@@ -7,9 +7,8 @@ from .books.views import router as book_router
 from .business.views import router as business_router
 
 
-
 router = APIRouter(
-    prefix = settings.api.prefix,
+    prefix=settings.api.prefix,
 )
 
 router.include_router(

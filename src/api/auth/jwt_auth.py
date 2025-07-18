@@ -12,35 +12,33 @@ from crud import users as users_crud
 from auth import tools as auth_tools
 from core.config import settings
 
-router = APIRouter(
-    prefix = settings.api.auth.prefix,
-    tags = ["JWT"]
-)
+router = APIRouter(prefix=settings.api.auth.prefix, tags=["JWT"])
 
-@router.post('/register')
+
+@router.post("/register")
 def create_user(
-    user_create : UserCreate,
-    session : Annotated[Session, Depends(db_helper.session_getter)]
+    user_create: UserCreate,
+    session: Annotated[Session, Depends(db_helper.session_getter)],
 ) -> UserRead:
     user = users_crud.create_user(user_create, session)
     return user
 
-@router.post('/login')
-def auth_user_jwt(
-    user : UserRead = Depends(tools_auth.validate_auth_user)
-) -> TokenInfo:
+
+@router.post("/login")
+def auth_user_jwt(user: UserRead = Depends(tools_auth.validate_auth_user)) -> TokenInfo:
     access_token = creation_tokens.create_access_token(user)
     refresh_token = creation_tokens.create_refresh_token(user)
     return TokenInfo(
-        access_token = access_token,
-        refresh_token = refresh_token,
+        access_token=access_token,
+        refresh_token=refresh_token,
     )
 
-@router.post('/refresh', response_model_exclude_none=True)
+
+@router.post("/refresh", response_model_exclude_none=True)
 def refresh_jwt(
-    user : UserRead = Depends(tools_auth.get_current_active_auth_user_for_refresh),
+    user: UserRead = Depends(tools_auth.get_current_active_auth_user_for_refresh),
 ) -> TokenInfo:
     access_token = creation_tokens.create_access_token(user)
     return TokenInfo(
-        access_token = access_token,
+        access_token=access_token,
     )

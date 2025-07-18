@@ -10,54 +10,60 @@ from core.schemas.exceptions import InvalidDataError
 from core.models.borrowed_books import BorrowedBook
 from core.models.users import User
 
+
 def get_all_books(
-    session : Session,
+    session: Session,
 ) -> Sequence[Book]:
     stmt = select(Book).order_by(Book.id)
 
     result = session.scalars(stmt)
     return result.all()
 
+
 def get_book_by_id(
-    book_id : int,
-    session : Session,
-) -> Book| None:
+    book_id: int,
+    session: Session,
+) -> Book | None:
     stmt = select(Book).where(Book.id == book_id)
     result = session.scalar(stmt)
     return result
 
+
 def get_books_by_name(
-        book_name : str, 
-        session : Session,
+    book_name: str,
+    session: Session,
 ) -> Sequence[Book] | Book | None:
     stmt = select(Book).where(Book.title == book_name)
     result = session.scalars(stmt)
 
     return result.all()
 
+
 def get_books_by_author(
-    author : str,
-    session : Session,
+    author: str,
+    session: Session,
 ) -> Sequence[Book]:
     stmt = select(Book).where(Book.author == author)
     result = session.scalars(stmt)
 
     return result.all()
 
+
 def get_books_by_isbn(
-    isbn : str,
-    session : Session,
+    isbn: str,
+    session: Session,
 ) -> Book | None:
     stmt = select(Book).where(Book.ISBN == isbn)
     result = session.scalar(stmt)
 
     return result
 
+
 def create_book(
-    book_create : BookCreate,
-    session : Session,
+    book_create: BookCreate,
+    session: Session,
 ) -> Book:
-    
+
     book = Book(**book_create.model_dump())
     session.add(book)
     try:
@@ -67,9 +73,10 @@ def create_book(
         raise InvalidDataError
     return book
 
+
 def delete_book_by_id(
-    book_id : int,
-    session : Session,
+    book_id: int,
+    session: Session,
 ) -> int | None:
     stmt = select(Book).where(Book.id == book_id)
     result = session.scalars(stmt)
@@ -89,12 +96,12 @@ def delete_book_by_id(
         # debug_session_objects(session)
         session.commit()
     return book.id if book else None
-    
+
 
 def update_book_data(
-    book : Book,
-    new_data : dict,
-    session : Session,
+    book: Book,
+    new_data: dict,
+    session: Session,
 ) -> None:
     for key, value in new_data.items():
         setattr(book, key, value)
@@ -103,5 +110,3 @@ def update_book_data(
     except DatabaseError:
         session.rollback()
         raise InvalidDataError
-
-
