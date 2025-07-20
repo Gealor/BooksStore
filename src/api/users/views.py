@@ -10,10 +10,12 @@ from core.schemas.users import UserBase, UserDelete, UserRead, UserUpdate
 from core.config import settings
 from crud import users as users_crud
 from crud import borrowed_books as bb_crud
+from core.models.exceptions.book import ListBooksNotFoundException
+from core.models.exceptions.user import ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
+from services.user_service import UserService
 
 
 router = APIRouter(prefix=settings.api.users.prefix, tags=["Users"])
-
 
 @router.get("/me")
 def auth_user_check_self_info(
@@ -30,7 +32,13 @@ def get_my_active_books(
     session: Annotated[Session, Depends(db_helper.session_getter)],
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> Sequence[BorrowedBookInfo]:
-    result = bb_crud.get_active_borrowed_books_by_user_id(user.id, session)
+    try:
+        result = UserService.get_my_active_books(user.id, session)
+    except ListBooksNotFoundException:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Active books not found."
+        )
 
     return result
 
@@ -40,7 +48,13 @@ def get_history_books(
     session: Annotated[Session, Depends(db_helper.session_getter)],
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> Sequence[BorrowedBookWithDate]:
-    result = bb_crud.get_history_about_books_by_user_id(user.id, session)
+    try:
+        result = UserService.get_history_books(user.id, session)
+    except ListBooksNotFoundException:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="History is empty."
+        )
 
     return result
 
@@ -51,12 +65,13 @@ def update_user(
     session: Annotated[Session, Depends(db_helper.session_getter)],
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> UserUpdate:
-    id = int(user.id)
-
-    found_user = users_crud.get_user_by_id(id, session)
-
-    values_dict = new_data.model_dump(exclude_unset=True)
-    users_crud.update_user_data(found_user, values_dict, session)
+    try:
+        UserService.update_user(new_data, user.id, session)
+    except UserNotFoundException:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found."
+        )
     return new_data
 
 
@@ -66,20 +81,24 @@ def delete_user(
     session: Annotated[Session, Depends(db_helper.session_getter)],
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> UserDelete:
-    if user.id == user_id:
+    try:
+        result = UserService.delete_user(
+            user_id=user_id,
+            self_id=user.id,
+            session=session,
+            raise_self_delete_exc=True,
+        )
+    except SelfDeleteException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You cannot delete yourself, use /delete-me",
         )
-    deleted_id = users_crud.delete_user_by_id(user_id, session)
-    if deleted_id is None:
+    except UserNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    return {
-        "deleted": deleted_id,
-    }
+    return result
 
 
 @router.delete("/delete-me")
@@ -87,10 +106,18 @@ def delete_self(
     session: Annotated[Session, Depends(db_helper.session_getter)],
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> UserDelete:
-    deleted_id = users_crud.delete_user_by_id(user.id, session)
-    return {
-        "deleted": deleted_id,
-    }
+    try:
+        result = UserService.delete_user(
+            user_id=user.id,
+            self_id=user.id,
+            session=session,
+        )
+    except UserNotFoundException:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return result
 
 
 @router.get("/find-users")
@@ -98,14 +125,14 @@ def get_users(
     session: Annotated[Session, Depends(db_helper.session_getter)],
     id: Optional[int] = None,
 ) -> list[UserRead] | UserRead:
-    users = (
-        users_crud.get_all_users(session=session)
-        if id is None
-        else users_crud.get_user_by_id(id, session)
-    )
-    if users is None:
+    try:
+        result = UserService.get_users(
+            id=id,
+            session=session,
+        )
+    except ListUsersNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Users not found" if id is None else "User not found",
         )
-    return users
+    return result
