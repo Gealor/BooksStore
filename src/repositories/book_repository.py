@@ -65,11 +65,10 @@ class BookRepository(BookRepositoryAbstract):
 
     def get_all_books(
         self,
-        session : Session,
     ) -> Sequence[Book]:
         stmt = select(Book).order_by(Book.id)
 
-        result = session.scalars(stmt)
+        result = self._session.scalars(stmt)
         return result.all()
 
     def get_book_by_id(
