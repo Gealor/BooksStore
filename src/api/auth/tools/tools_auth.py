@@ -10,14 +10,19 @@ from api.auth.tools.creation_tokens import (
 )
 from core.models import db_helper
 from core.schemas.users import UserRead
-from crud import auth as auth_crud
-from crud import users as users_crud
 from auth import tools as auth_tools
+from repositories.auth_repository import AuthRepository
+from services.user_service import UserService
 
 # чтобы в документации появилось поле для ввода токена
 http_bearer = HTTPBearer(auto_error=False)  # чтобы не выбрасывал ошибку автоматически
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
+unauthed_exc = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Invalid username or password",
+)
 
 
 def validate_auth_user(
@@ -28,13 +33,7 @@ def validate_auth_user(
     password: str = Form(),
     session: Session = Depends(db_helper.session_getter),
 ):
-
-    unauthed_exc = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid username or password",
-    )
-
-    if not (user := auth_crud.get_data_by_email(username, session)):
+    if not (user := AuthRepository(session=session).get_data_by_email(username)):
         raise unauthed_exc
 
     if not auth_tools.compare_hashed_passwords(
@@ -57,9 +56,7 @@ def get_jwt_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired."
         )
-    except (
-        InvalidTokenError
-    ) as e:  # может быть такое что токен содержит меньше сегментов в payload чем расчитано
+    except InvalidTokenError as e:  # может быть такое что токен содержит меньше сегментов в payload чем расчитано
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid to decode token."
         )
@@ -77,7 +74,7 @@ def validate_token_type(payload: dict, token_type_: str):
 
 def get_user_by_token_type(payload, session) -> UserRead:
     id: int | None = int(payload.get("sub"))
-    if not (user := users_crud.get_user_by_id(id, session)):
+    if not (user := UserService.get_users(id, session)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",

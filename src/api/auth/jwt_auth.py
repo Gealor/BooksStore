@@ -7,10 +7,9 @@ from api.auth.tools import tools_auth
 from api.auth.tools import creation_tokens
 from core.models import db_helper
 from core.schemas.auth_info import TokenInfo
-from core.schemas.users import UserBase, UserCreate, UserRead
-from crud import users as users_crud
-from auth import tools as auth_tools
+from core.schemas.users import UserCreate, UserRead
 from core.config import settings
+from services.user_service import UserService
 
 router = APIRouter(prefix=settings.api.auth.prefix, tags=["JWT"])
 
@@ -20,7 +19,7 @@ def create_user(
     user_create: UserCreate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
 ) -> UserRead:
-    user = users_crud.create_user(user_create, session)
+    user = UserService.create_user(user_create, session)
     return user
 
 

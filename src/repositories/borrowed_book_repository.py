@@ -18,12 +18,6 @@ class BorrowedBookRepositoryAbstract(Protocol):
     ) -> BorrowedBook | None:
         pass
 
-    def get_active_borrowed_books_by_user_id(
-        self,
-        user_id,
-    ) -> Sequence[BorrowedBook]:
-        pass
-
     def get_history_about_books_by_user_id(
         self,
         user_id: int,
@@ -76,20 +70,6 @@ class BorrowedBookRepository(BorrowedBookRepositoryAbstract):
         result = self._session.scalar(stmt)
 
         return result
-
-    def get_active_borrowed_books_by_user_id(
-        self,
-        user_id,
-    ) -> Sequence[BorrowedBook]:
-        stmt = select(BorrowedBook).where(
-            and_(
-                BorrowedBook.reader_id == user_id,
-                BorrowedBook.return_date.is_(None),
-            )
-        )
-        result = self._session.scalars(stmt)
-
-        return result.all()
 
     def get_history_about_books_by_user_id(
         self,

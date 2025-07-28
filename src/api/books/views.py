@@ -62,8 +62,8 @@ def update_book_by_id(
             detail="Invalid data",
         )
     return result
-    
-    
+
+
 @router.delete("/delete-book")
 def delete_book_by_id(
     book_id: int,

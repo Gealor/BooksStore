@@ -4,18 +4,20 @@ from sqlalchemy.orm import Session
 
 from api.auth.tools.tools_auth import get_current_active_auth_user
 from core.models import db_helper
-from core.schemas.books import BookRead
 from core.schemas.borrowed_books import BorrowedBookInfo, BorrowedBookWithDate
 from core.schemas.users import UserBase, UserDelete, UserRead, UserUpdate
 from core.config import settings
-from crud import users as users_crud
-from crud import borrowed_books as bb_crud
 from core.models.exceptions.book import ListBooksNotFoundException
-from core.models.exceptions.user import ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
+from core.models.exceptions.user import (
+    ListUsersNotFoundException,
+    SelfDeleteException,
+    UserNotFoundException,
+)
 from services.user_service import UserService
 
 
 router = APIRouter(prefix=settings.api.users.prefix, tags=["Users"])
+
 
 @router.get("/me")
 def auth_user_check_self_info(
@@ -36,8 +38,7 @@ def get_my_active_books(
         result = UserService.get_my_active_books(user.id, session)
     except ListBooksNotFoundException:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Active books not found."
+            status_code=status.HTTP_404_NOT_FOUND, detail="Active books not found."
         )
 
     return result
@@ -52,8 +53,7 @@ def get_history_books(
         result = UserService.get_history_books(user.id, session)
     except ListBooksNotFoundException:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="History is empty."
+            status_code=status.HTTP_404_NOT_FOUND, detail="History is empty."
         )
 
     return result
@@ -69,8 +69,7 @@ def update_user(
         UserService.update_user(new_data, user.id, session)
     except UserNotFoundException:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found."
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
         )
     return new_data
 

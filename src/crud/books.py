@@ -63,7 +63,6 @@ def create_book(
     book_create: BookCreate,
     session: Session,
 ) -> Book:
-
     book = Book(**book_create.model_dump())
     session.add(book)
     try:

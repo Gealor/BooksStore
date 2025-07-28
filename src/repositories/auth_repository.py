@@ -1,5 +1,5 @@
 from typing import Tuple
-from sqlalchemy import select
+from sqlalchemy import Row, select
 from sqlalchemy.orm import Session
 
 from core.models import User, db_helper
@@ -13,7 +13,7 @@ class AuthRepository:
     def find_user_by_email(
         self,
         email: str,
-    ) -> Tuple[str] | None:
+    ) -> Row[Tuple[str]] | None:
         stmt = select(User.email).where(User.email == email)
 
         result = self._session.execute(stmt)

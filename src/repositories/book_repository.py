@@ -8,53 +8,53 @@ from core.models import Book
 from core.schemas.books import BookCreate
 from core.schemas.exceptions import InvalidDataError
 
+
 class BookRepositoryAbstract(Protocol):
     def get_all_books(
         self,
-        session : Session,
     ) -> Sequence[Book]:
         pass
 
     def get_book_by_id(
         self,
-        book_id : int,
-    ) -> Book| None:
+        book_id: int,
+    ) -> Book | None:
         pass
 
     def get_books_by_name(
         self,
-        book_name : str, 
+        book_name: str,
     ) -> Sequence[Book] | Book | None:
         pass
 
     def get_books_by_author(
         self,
-        author : str,
+        author: str,
     ) -> Sequence[Book]:
         pass
 
     def get_books_by_isbn(
         self,
-        isbn : str,
+        isbn: str,
     ) -> Book | None:
         pass
 
     def create_book(
         self,
-        book_create : BookCreate,
+        book_create: BookCreate,
     ) -> Book:
         pass
 
     def delete_book_by_id(
         self,
-        book_id : int,
+        book_id: int,
     ) -> int | None:
         pass
-        
+
     def update_book_data(
         self,
-        book : Book,
-        new_data : dict,
+        book: Book,
+        new_data: dict,
     ) -> None:
         pass
 
@@ -73,15 +73,15 @@ class BookRepository(BookRepositoryAbstract):
 
     def get_book_by_id(
         self,
-        book_id : int,
-    ) -> Book| None:
+        book_id: int,
+    ) -> Book | None:
         stmt = select(Book).where(Book.id == book_id)
         result = self._session.scalar(stmt)
         return result
 
     def get_books_by_name(
         self,
-        book_name : str, 
+        book_name: str,
     ) -> Sequence[Book] | Book | None:
         stmt = select(Book).where(Book.title == book_name)
         result = self._session.scalars(stmt)
@@ -90,7 +90,7 @@ class BookRepository(BookRepositoryAbstract):
 
     def get_books_by_author(
         self,
-        author : str,
+        author: str,
     ) -> Sequence[Book]:
         stmt = select(Book).where(Book.author == author)
         result = self._session.scalars(stmt)
@@ -99,7 +99,7 @@ class BookRepository(BookRepositoryAbstract):
 
     def get_books_by_isbn(
         self,
-        isbn : str,
+        isbn: str,
     ) -> Book | None:
         stmt = select(Book).where(Book.ISBN == isbn)
         result = self._session.scalar(stmt)
@@ -108,9 +108,8 @@ class BookRepository(BookRepositoryAbstract):
 
     def create_book(
         self,
-        book_create : BookCreate,
+        book_create: BookCreate,
     ) -> Book:
-        
         book = Book(**book_create.model_dump())
         self._session.add(book)
         try:
@@ -122,7 +121,7 @@ class BookRepository(BookRepositoryAbstract):
 
     def delete_book_by_id(
         self,
-        book_id : int,
+        book_id: int,
     ) -> int | None:
         stmt = select(Book).where(Book.id == book_id)
         result = self._session.scalars(stmt)
@@ -144,12 +143,11 @@ class BookRepository(BookRepositoryAbstract):
         else:
             self._session.rollback()
         return book.id if book else None
-        
 
     def update_book_data(
         self,
-        book : Book,
-        new_data : dict,
+        book: Book,
+        new_data: dict,
     ) -> None:
         for key, value in new_data.items():
             setattr(book, key, value)
