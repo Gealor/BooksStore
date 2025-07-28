@@ -7,12 +7,13 @@ name = "test_case"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Gealor",email = "gzazulya@gmail.com"}
+    "Gealor"
 ]
 readme = "README.md"
-requires-python = ">=3.11"
 package-mode = false
 
+[tool.mypy]
+ignore_missing_imports = true
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -30,9 +31,12 @@ psycopg2 = "^2.9.10"
 psycopg2-binary = "^2.9.10"
 httpx = "^0.28.1"
 setuptools = "^80.9.0"
+ruff = "^0.12.5"
+types-psycopg2 = "^2.9.21.20250718"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
+mypy = "^1.17.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.0"
