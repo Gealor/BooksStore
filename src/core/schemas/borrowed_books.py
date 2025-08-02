@@ -20,7 +20,8 @@ class BorrowedBookCreate(BorrowedBookBase):
 
 
 class BorrowedBookUpdate(BaseModel):
-    # если указать просто datetime.now(), то значение по умолчанию поставится в момент определения класса
+    # если указать просто datetime.now(), то значение по умолчанию поставится в момент определения класса, т.е. при запуске приложения
+    # надо указывать фабрику, которая при каждом создании экземпляра будет вызывать дополнительно эту фабрику.
     return_date: datetime = Field(default_factory=datetime.now)
 
 
@@ -29,6 +30,7 @@ class BorrowedBookDelete(BaseModel):
 
 
 class BorrowedBookInfo(BaseModel):
+    record_id: int = Field(alias="id")
     book: BookInfo
 
 
