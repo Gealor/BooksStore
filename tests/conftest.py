@@ -4,10 +4,10 @@ from sqlalchemy import text
 from core.schemas.books import BookCreate
 from core.schemas.users import UserCreate
 from core.models import db_helper_mock, db_helper
-from crud import users as users_crud
-from crud import books as books_crud
 from create_mock_database import create_all_mock_tables
 from create_mock_database import drop_all_mock_table
+from repositories.book_repository import BookRepository
+from repositories.user_repository import UserRepository
 
 list_users = [
     {
@@ -76,17 +76,17 @@ def fill_and_clear_databases():
     drop_all_mock_table()
     create_all_mock_tables()
     with db_helper_mock.session_factory() as session:
+        user_repo = UserRepository(session=session)
+        book_repo = BookRepository(session=session)
         for user in list_users:
             user_model = UserCreate(**user)
-            result = users_crud.create_user(
+            result = user_repo.create_user(
                 user_model,
-                session,
             )
         for book in list_books:
             book_model = BookCreate(**book)
-            result = books_crud.create_book(
+            result = book_repo.create_book(
                 book_model,
-                session,
             )
     yield
     pass

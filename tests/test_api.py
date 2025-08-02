@@ -3,7 +3,6 @@ from sqlalchemy import text
 
 from core.models import db_helper, db_helper_mock
 from core.schemas.users import UserCreate
-from crud import users as users_crud
 from main import main_app
 
 # заменяю зависимость от основной базы данных на mock базу данных

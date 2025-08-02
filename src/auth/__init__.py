@@ -3,7 +3,7 @@ __all__ = (
     "compare_hashed_passwords",
 )
 
-from .tools import (
+from .passwords import (
     hash_password,
     compare_hashed_passwords,
 )

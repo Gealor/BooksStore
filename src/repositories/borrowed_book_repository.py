@@ -1,9 +1,7 @@
 from typing import Protocol, Sequence
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload, Session
-from sqlalchemy.exc import DatabaseError
 
-from core.models.books import Book
 from core.models.borrowed_books import BorrowedBook
 from core.schemas.borrowed_books import BorrowedBookCreate, BorrowedBookUpdate
 
@@ -90,7 +88,7 @@ class BorrowedBookRepository(BorrowedBookRepositoryAbstract):
     def get_active_borrowed_books_by_user_id(
         self,
         user_id: int,
-    ) -> Sequence[BorrowedBook]: 
+    ) -> Sequence[BorrowedBook]:
         stmt = (
             select(BorrowedBook)
             .join(BorrowedBook.book)
@@ -141,5 +139,3 @@ class BorrowedBookRepository(BorrowedBookRepositoryAbstract):
             setattr(record, key, value)
 
         self._session.commit()
-
-    

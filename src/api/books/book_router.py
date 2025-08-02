@@ -1,14 +1,13 @@
 from fastapi import APIRouter
-from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from api.auth.tools.tools_auth import get_current_active_auth_user
+from auth.tools_auth import get_current_active_auth_user
 from core.config import settings
 from core.models import db_helper
 from core.schemas.exceptions import BookNotFoundException, InvalidDataError
 from core.schemas.users import UserRead
-from crud import books as books_crud
 from core.schemas.books import BookCreate, BookDelete, BookRead, BookUpdate
 from services.book_service import BookService
 
@@ -51,7 +50,7 @@ def update_book_by_id(
 ) -> BookUpdate:
     try:
         result = BookService.update_book_by_id(book_id, book_update, session)
-    except BookNotFoundException as e:
+    except BookNotFoundException:
         HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Book not found",

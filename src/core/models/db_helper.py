@@ -1,4 +1,3 @@
-from typing import AsyncGenerator
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 

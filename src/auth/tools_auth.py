@@ -3,14 +3,15 @@ from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 
-from api.auth.tools.creation_tokens import (
+from auth.creation_tokens import (
     ACCESS_TOKEN_TYPE,
     REFRESH_TOKEN_TYPE,
     TOKEN_TYPE_FIELD,
+    decode_jwt,
 )
+from auth.passwords import compare_hashed_passwords
 from core.models import db_helper
 from core.schemas.users import UserRead
-from auth import tools as auth_tools
 from repositories.auth_repository import AuthRepository
 from services.user_service import UserService
 
@@ -36,7 +37,7 @@ def validate_auth_user(
     if not (user := AuthRepository(session=session).get_data_by_email(username)):
         raise unauthed_exc
 
-    if not auth_tools.compare_hashed_passwords(
+    if not compare_hashed_passwords(
         password.encode("utf-8"),
         user.password.encode("utf-8"),
     ):
@@ -49,14 +50,16 @@ def get_jwt_token(
     token: str = Depends(oauth2_schema),
 ) -> dict:
     try:
-        payload = auth_tools.decode_jwt(jwt_token=token)
+        payload = decode_jwt(jwt_token=token)
     except (
         ExpiredSignatureError
-    ) as e:  # ExpiredSignatureError наследуется от ошибки InvalidTokenError
+    ):  # ExpiredSignatureError наследуется от ошибки InvalidTokenError
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired."
         )
-    except InvalidTokenError as e:  # может быть такое что токен содержит меньше сегментов в payload чем расчитано
+    except (
+        InvalidTokenError
+    ):  # может быть такое что токен содержит меньше сегментов в payload чем расчитано
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid to decode token."
         )

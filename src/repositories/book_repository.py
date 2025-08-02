@@ -114,7 +114,7 @@ class BookRepository(BookRepositoryAbstract):
         self._session.add(book)
         try:
             self._session.commit()
-        except DatabaseError as e:
+        except DatabaseError:
             self._session.rollback()
             raise InvalidDataError
         return book

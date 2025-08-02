@@ -1,8 +1,6 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from core.models.base import Base
-from core.models.db_helper import db_helper
 from core.config import settings
 
 

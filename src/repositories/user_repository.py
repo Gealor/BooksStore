@@ -2,7 +2,8 @@ from typing import Protocol, Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload, Session
 
-from auth import tools as auth_tools
+
+from auth import hash_password
 from core.models import User
 from core.schemas.users import UserCreate
 
@@ -59,9 +60,7 @@ class UserRepository(UserRepositoryAbstract):
         self,
         user_create: UserCreate,
     ) -> User:
-        user_create.password = auth_tools.hash_password(user_create.password).decode(
-            "utf-8"
-        )
+        user_create.password = hash_password(user_create.password).decode("utf-8")
 
         user = User(**user_create.model_dump())
         self._session.add(user)
@@ -90,9 +89,7 @@ class UserRepository(UserRepositoryAbstract):
         new_data: dict,
     ) -> None:
         if "password" in new_data:
-            new_data["password"] = auth_tools.hash_password(
-                new_data["password"]
-            ).decode("utf-8")
+            new_data["password"] = hash_password(new_data["password"]).decode("utf-8")
         for key, value in new_data.items():
             setattr(user, key, value)
 

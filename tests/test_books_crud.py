@@ -2,7 +2,6 @@ from pydantic import ValidationError
 import pytest
 from sqlalchemy import text
 from core.schemas.books import BookCreate, BookUpdate
-from crud import books as books_crud
 from core.models.db_helper import db_helper_mock
 from repositories.book_repository import BookRepository
 

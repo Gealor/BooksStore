@@ -1,10 +1,55 @@
 import copy
 import datetime
-from typing import Any
 import jwt
-import bcrypt
-
+from core.schemas.users import UserRead
 from core.config import settings
+
+TOKEN_TYPE_FIELD = "type"
+ACCESS_TOKEN_TYPE = "access"
+ACCESS_TOKEN_TYPE = "access"
+REFRESH_TOKEN_TYPE = "refresh"
+
+
+def create_jwt(
+    token_type: str,
+    token_data: dict,
+    expire_minutes: int = settings.jwt.access_token_expire_minutes,
+) -> str:
+    jwt_payload = {
+        TOKEN_TYPE_FIELD: token_type,
+    }
+    jwt_payload.update(token_data)
+
+    token = encode_jwt(payload=jwt_payload, expire_minutes=expire_minutes)
+    return token
+
+
+def create_access_token(user: UserRead) -> str:
+    jwt_payload = {
+        "sub": str(user.id),
+        "name": user.name,
+        "email": user.email,
+    }
+
+    access_token = create_jwt(
+        token_type=ACCESS_TOKEN_TYPE,
+        token_data=jwt_payload,
+        expire_minutes=settings.jwt.access_token_expire_minutes,
+    )
+    return access_token
+
+
+def create_refresh_token(user: UserRead) -> str:
+    jwt_payload = {
+        "sub": str(user.id),
+    }
+
+    refresh_token = create_jwt(
+        token_type=REFRESH_TOKEN_TYPE,
+        token_data=jwt_payload,
+        expire_minutes=settings.jwt.get_refresh_minutes_from_days(),
+    )
+    return refresh_token
 
 
 def encode_jwt(
@@ -37,18 +82,3 @@ def decode_jwt(
         algorithms=[algorithm],
     )
     return decoded
-
-
-def hash_password(
-    password: str,
-) -> bytes:
-    salt = bcrypt.gensalt()
-    pwd_bytes: bytes = password.encode("utf-8")
-    return bcrypt.hashpw(pwd_bytes, salt)
-
-
-def compare_hashed_passwords(
-    entered_password: bytes,
-    hashed_password: bytes,
-) -> bool:
-    return bcrypt.checkpw(entered_password, hashed_password)

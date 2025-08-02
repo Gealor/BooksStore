@@ -1,10 +1,10 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 
-from api.auth.tools import tools_auth
-from api.auth.tools import creation_tokens
+
+from auth.creation_tokens import create_access_token, create_refresh_token
+from auth.tools_auth import validate_auth_user, get_current_active_auth_user_for_refresh
 from core.models import db_helper
 from core.schemas.auth_info import TokenInfo
 from core.schemas.users import UserCreate, UserRead
@@ -24,9 +24,9 @@ def create_user(
 
 
 @router.post("/login")
-def auth_user_jwt(user: UserRead = Depends(tools_auth.validate_auth_user)) -> TokenInfo:
-    access_token = creation_tokens.create_access_token(user)
-    refresh_token = creation_tokens.create_refresh_token(user)
+def auth_user_jwt(user: UserRead = Depends(validate_auth_user)) -> TokenInfo:
+    access_token = create_access_token(user)
+    refresh_token = create_refresh_token(user)
     return TokenInfo(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -35,9 +35,9 @@ def auth_user_jwt(user: UserRead = Depends(tools_auth.validate_auth_user)) -> To
 
 @router.post("/refresh", response_model_exclude_none=True)
 def refresh_jwt(
-    user: UserRead = Depends(tools_auth.get_current_active_auth_user_for_refresh),
+    user: UserRead = Depends(get_current_active_auth_user_for_refresh),
 ) -> TokenInfo:
-    access_token = creation_tokens.create_access_token(user)
+    access_token = create_access_token(user)
     return TokenInfo(
         access_token=access_token,
     )

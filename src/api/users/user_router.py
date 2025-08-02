@@ -2,7 +2,7 @@ from typing import Annotated, Optional, Sequence
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from api.auth.tools.tools_auth import get_current_active_auth_user
+from auth.tools_auth import get_current_active_auth_user
 from core.models import db_helper
 from core.schemas.borrowed_books import BorrowedBookInfo, BorrowedBookWithDate
 from core.schemas.users import UserBase, UserDelete, UserRead, UserUpdate

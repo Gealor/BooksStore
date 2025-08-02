@@ -1,22 +1,25 @@
-from typing import Annotated, Optional
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from api.auth.tools.tools_auth import get_current_active_auth_user
+from auth.tools_auth import get_current_active_auth_user
 from core.config import settings
 from core.models import db_helper
 from core.schemas.borrowed_books import (
-    BorrowedBookCreate,
     BorrowedBookRead,
     BorrowedBookUpdate,
 )
 from core.schemas.users import UserRead
-from core.schemas.exceptions import BookAlreadyReturnException, BookNotFoundException, IncreaseNumberOfCopiesException, MaxNumberBorrowedBooksException, ReduceNumberOfCopiesException, UserMissingBookException, ZeroCopiesException
-from services.book_service import BookService
+from core.schemas.exceptions import (
+    BookAlreadyReturnException,
+    BookNotFoundException,
+    IncreaseNumberOfCopiesException,
+    MaxNumberBorrowedBooksException,
+    ReduceNumberOfCopiesException,
+    UserMissingBookException,
+    ZeroCopiesException,
+)
 from services.borrowed_books_service import BorrowedBookService
-from .tools import utils
-from crud import books as books_crud
-from crud import borrowed_books as bb_crud
 
 router = APIRouter(
     prefix=settings.api.business.prefix,
@@ -31,7 +34,9 @@ def lending_book(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> BorrowedBookRead:
     try:
-        result = BorrowedBookService.lending_book(book_id=book_id, user_id=user.id, session=session)
+        result = BorrowedBookService.lending_book(
+            book_id=book_id, user_id=user.id, session=session
+        )
     except BookNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -51,7 +56,7 @@ def lending_book(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid data",
         )
-    
+
     return result
 
 
@@ -63,9 +68,7 @@ def return_book(
 ) -> BorrowedBookUpdate:
     try:
         result = BorrowedBookService.return_book(
-            borrowed_id=borrowed_id, 
-            auth_user_id=user.id, 
-            session=session
+            borrowed_id=borrowed_id, auth_user_id=user.id, session=session
         )
     except BookNotFoundException:
         raise HTTPException(
@@ -88,4 +91,3 @@ def return_book(
             detail="Invalid data",
         )
     return result
-

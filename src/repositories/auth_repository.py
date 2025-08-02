@@ -2,7 +2,7 @@ from typing import Tuple
 from sqlalchemy import Row, select
 from sqlalchemy.orm import Session
 
-from core.models import User, db_helper
+from core.models import User
 from core.schemas.users import UserLoginInfo
 
 

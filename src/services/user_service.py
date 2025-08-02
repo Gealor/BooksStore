@@ -84,7 +84,7 @@ class UserService:
             raise ListUsersNotFoundException
 
         return users
-    
+
     @staticmethod
     def create_user(user_create: UserCreate, session: Session) -> UserRead:
         user = UserRepository(session=session).create_user(user_create)
