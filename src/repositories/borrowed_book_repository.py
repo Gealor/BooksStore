@@ -110,9 +110,11 @@ class BorrowedBookRepository(BorrowedBookRepositoryAbstract):
 
     def create_borrowed_book_record(
         self,
-        record_create: BorrowedBookCreate,
+        book_id: int,
+        reader_id: int,
     ) -> BorrowedBook:
-        record = BorrowedBook(**record_create.model_dump())
+        new_record = BorrowedBookCreate(book_id=book_id, reader_id=reader_id)
+        record = BorrowedBook(**new_record.model_dump())
 
         self._session.add(record)
         self._session.commit()
@@ -141,3 +143,5 @@ class BorrowedBookRepository(BorrowedBookRepositoryAbstract):
             setattr(record, key, value)
 
         self._session.commit()
+
+    
