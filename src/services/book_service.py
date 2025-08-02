@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from core.schemas.books import BookCreate, BookDelete, BookRead, BookUpdate
 from repositories.book_repository import BookRepository
 from core.models.books import Book
-from core.schemas.exceptions import BookNotFoundException
+from core.schemas.exceptions import BookNotFoundException, IncreaseNumberOfCopiesException, InvalidDataError, ReduceNumberOfCopiesException, ZeroCopiesException
 
 
 class BookService:
@@ -41,3 +41,40 @@ class BookService:
         return {
             "deleted": deleted_id,
         }
+    
+    @staticmethod
+    def get_book_by_id(book_id: int, session: Session) -> Book | None:
+        book = BookRepository(session=session).get_book_by_id(book_id=book_id)
+        return book
+    
+    @staticmethod
+    def reduce_number_of_copies(book_id: int, session: Session) -> None:
+        repo = BookRepository(session=session)
+        book = repo.get_book_by_id(book_id=book_id)
+
+        if book is None:
+            raise BookNotFoundException
+        
+        if book.number_copies==0:
+            raise ZeroCopiesException
+        
+        new_data = {"number_copies": book.number_copies - 1}
+        try:
+           repo.update_book_data(book=book, new_data=new_data)
+        except InvalidDataError:
+            raise ReduceNumberOfCopiesException
+        
+    @staticmethod
+    def increase_number_of_copies(book_id: int, session: Session) -> None:
+        repo = BookRepository(session=session)
+        book = repo.get_book_by_id(book_id=book_id)
+
+        if book is None:
+            raise BookNotFoundException
+        
+        new_data = {"number_copies": book.number_copies + 1}
+        try:
+           repo.update_book_data(book=book, new_data=new_data)
+        except InvalidDataError:
+            raise IncreaseNumberOfCopiesException
+        
