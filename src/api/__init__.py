@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
 from core.config import settings
-from .auth.jwt_auth import router as auth_router
-from .users.views import router as user_router
-from .books.views import router as book_router
-from .business.views import router as business_router
+from .auth.auth_router import router as auth_router
+from .users.user_router import router as user_router
+from .books.book_router import router as book_router
+from .business.business_router import router as business_router
 
 
 router = APIRouter(
