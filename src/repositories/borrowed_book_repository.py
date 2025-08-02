@@ -90,9 +90,7 @@ class BorrowedBookRepository(BorrowedBookRepositoryAbstract):
     def get_active_borrowed_books_by_user_id(
         self,
         user_id: int,
-    ) -> Sequence[BorrowedBook]:
-        # нельзя в select указать BorrowedBook.book, т.к. мы подгружаем данные(с помощью options) для таблицы BorrowedBooks
-        # если надо использовать именно BorrowedBook.book надо убрать options и использовать join(уже есть)
+    ) -> Sequence[BorrowedBook]: 
         stmt = (
             select(BorrowedBook)
             .join(BorrowedBook.book)
