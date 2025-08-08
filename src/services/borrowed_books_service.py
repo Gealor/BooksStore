@@ -14,22 +14,24 @@ from core.config import settings
 
 
 class BorrowedBookService:
-    @staticmethod
-    def lending_book(book_id: int, user_id: int, session: Session) -> BorrowedBook:
-        repo = BorrowedBookRepository(session=session)
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def lending_book(self, book_id: int, user_id: int) -> BorrowedBook:
+        repo = BorrowedBookRepository(session=self.session)
         borrowed_books_user = repo.get_active_borrowed_books_by_user_id(user_id=user_id)
         if len(borrowed_books_user) == settings.business.max_active_books:
             raise MaxNumberBorrowedBooksException
         record = repo.create_borrowed_book_record(book_id=book_id, reader_id=user_id)
-        BookService.reduce_number_of_copies(book_id=book_id, session=session)
+        BookService(session=self.session).reduce_number_of_copies(book_id=book_id)
 
         return record
 
-    @staticmethod
+    
     def return_book(
-        borrowed_id: int, auth_user_id: int, session: Session
+        self, borrowed_id: int, auth_user_id: int,
     ) -> BorrowedBookUpdate:
-        repo = BorrowedBookRepository(session=session)
+        repo = BorrowedBookRepository(session=self.session)
         borrowed_book = repo.get_borrowed_book_by_id(borrowed_id)
 
         if borrowed_book is None:
@@ -48,8 +50,8 @@ class BorrowedBookService:
             record_update=new_data,
         )
 
-        BookService.increase_number_of_copies(
-            book_id=borrowed_book.book_id, session=session
+        BookService(session=self.session).increase_number_of_copies(
+            book_id=borrowed_book.book_id,
         )
 
         return new_data

@@ -21,7 +21,7 @@ router = APIRouter(
 def get_all_books(
     session: Annotated[Session, Depends(db_helper.session_getter)],
 ) -> list[BookRead]:
-    books = BookService.get_all_books(session)
+    books = BookService(session=session).get_all_books()
     return books
 
 
@@ -32,7 +32,7 @@ def create_book(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> BookRead:
     try:
-        book = BookService.create_book(book_create, session)
+        book = BookService(session=session).create_book(book_create)
     except InvalidDataError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -49,7 +49,7 @@ def update_book_by_id(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> BookUpdate:
     try:
-        result = BookService.update_book_by_id(book_id, book_update, session)
+        result = BookService(session=session).update_book_by_id(book_id, book_update)
     except BookNotFoundException:
         HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -70,7 +70,7 @@ def delete_book_by_id(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> BookDelete:
     try:
-        result = BookService.delete_book_by_id(book_id, session)
+        result = BookService(session=session).delete_book_by_id(book_id)
     except BookNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

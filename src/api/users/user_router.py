@@ -35,7 +35,7 @@ def get_my_active_books(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> Sequence[BorrowedBookInfo]:
     try:
-        result = UserService.get_my_active_books(user.id, session)
+        result = UserService(session=session).get_my_active_books(user.id)
     except ListBooksNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Active books not found."
@@ -50,7 +50,7 @@ def get_history_books(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> Sequence[BorrowedBookWithDate]:
     try:
-        result = UserService.get_history_books(user.id, session)
+        result = UserService(session=session).get_history_books(user.id)
     except ListBooksNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="History is empty."
@@ -66,7 +66,7 @@ def update_user(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> UserUpdate:
     try:
-        UserService.update_user(new_data, user.id, session)
+        UserService(session=session).update_user(new_data, user.id)
     except UserNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
@@ -81,10 +81,9 @@ def delete_user(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> UserDelete:
     try:
-        result = UserService.delete_user(
+        result = UserService(session=session).delete_user(
             user_id=user_id,
             self_id=user.id,
-            session=session,
             raise_self_delete_exc=True,
         )
     except SelfDeleteException:
@@ -106,10 +105,9 @@ def delete_self(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> UserDelete:
     try:
-        result = UserService.delete_user(
+        result = UserService(session=session).delete_user(
             user_id=user.id,
             self_id=user.id,
-            session=session,
         )
     except UserNotFoundException:
         raise HTTPException(
@@ -125,9 +123,8 @@ def get_users(
     id: Optional[int] = None,
 ) -> list[UserRead] | UserRead:
     try:
-        result = UserService.get_users(
+        result = UserService(session=session).get_users(
             id=id,
-            session=session,
         )
     except ListUsersNotFoundException:
         raise HTTPException(

@@ -13,21 +13,23 @@ from core.schemas.exceptions import (
 
 
 class BookService:
-    @staticmethod
-    def get_all_books(session: Session) -> list[BookRead]:
-        books = BookRepository(session=session).get_all_books()
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def get_all_books(self) -> list[BookRead]:
+        books = BookRepository(session=self.session).get_all_books()
         return books
 
-    @staticmethod
-    def create_book(book_create: BookCreate, session: Session) -> Book:
-        book = BookRepository(session=session).create_book(book_create)
+    
+    def create_book(self, book_create: BookCreate) -> Book:
+        book = BookRepository(session=self.session).create_book(book_create)
         return book
 
-    @staticmethod
+    
     def update_book_by_id(
-        book_id: int, book_update: BookUpdate, session: Session
+        self, book_id: int, book_update: BookUpdate,
     ) -> BookUpdate:
-        repo = BookRepository(session=session)
+        repo = BookRepository(session=self.session)
         found_book = repo.get_book_by_id(book_id)
         if found_book is None:
             raise BookNotFoundException
@@ -37,23 +39,23 @@ class BookService:
 
         return book_update
 
-    @staticmethod
-    def delete_book_by_id(book_id: int, session: Session) -> BookDelete:
-        deleted_id = BookRepository(session=session).delete_book_by_id(book_id)
+    
+    def delete_book_by_id(self, book_id: int) -> BookDelete:
+        deleted_id = BookRepository(session=self.session).delete_book_by_id(book_id)
         if deleted_id is None:
             raise BookNotFoundException
         return {
             "deleted": deleted_id,
         }
 
-    @staticmethod
-    def get_book_by_id(book_id: int, session: Session) -> Book | None:
-        book = BookRepository(session=session).get_book_by_id(book_id=book_id)
+    
+    def get_book_by_id(self, book_id: int) -> Book | None:
+        book = BookRepository(session=self.session).get_book_by_id(book_id=book_id)
         return book
 
-    @staticmethod
-    def reduce_number_of_copies(book_id: int, session: Session) -> None:
-        repo = BookRepository(session=session)
+    
+    def reduce_number_of_copies(self, book_id: int) -> None:
+        repo = BookRepository(session=self.session)
         book = repo.get_book_by_id(book_id=book_id)
 
         if book is None:
@@ -68,9 +70,9 @@ class BookService:
         except InvalidDataError:
             raise ReduceNumberOfCopiesException
 
-    @staticmethod
-    def increase_number_of_copies(book_id: int, session: Session) -> None:
-        repo = BookRepository(session=session)
+    
+    def increase_number_of_copies(self, book_id: int) -> None:
+        repo = BookRepository(session=self.session)
         book = repo.get_book_by_id(book_id=book_id)
 
         if book is None:

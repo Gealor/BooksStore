@@ -77,7 +77,7 @@ def validate_token_type(payload: dict, token_type_: str):
 
 def get_user_by_token_type(payload, session) -> UserRead:
     id: int | None = int(payload.get("sub"))
-    if not (user := UserService.get_users(id, session)):
+    if not (user := UserService(session=session).get_users(id)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",

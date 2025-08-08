@@ -19,7 +19,7 @@ def create_user(
     user_create: UserCreate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
 ) -> UserRead:
-    user = UserService.create_user(user_create, session)
+    user = UserService(session=session).create_user(user_create)
     return user
 
 

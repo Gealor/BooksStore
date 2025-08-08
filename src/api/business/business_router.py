@@ -34,8 +34,8 @@ def lending_book(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> BorrowedBookRead:
     try:
-        result = BorrowedBookService.lending_book(
-            book_id=book_id, user_id=user.id, session=session
+        result = BorrowedBookService(session=session).lending_book(
+            book_id=book_id, user_id=user.id
         )
     except BookNotFoundException:
         raise HTTPException(
@@ -67,8 +67,8 @@ def return_book(
     user: UserRead = Depends(get_current_active_auth_user),
 ) -> BorrowedBookUpdate:
     try:
-        result = BorrowedBookService.return_book(
-            borrowed_id=borrowed_id, auth_user_id=user.id, session=session
+        result = BorrowedBookService(session=session).return_book(
+            borrowed_id=borrowed_id, auth_user_id=user.id,
         )
     except BookNotFoundException:
         raise HTTPException(
