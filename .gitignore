@@ -178,6 +178,7 @@ cython_debug/
 
 # JWT keys and certificates
 certs/
+other_certs/
 
 # VSCode
 .vscode/
