@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -8,6 +9,13 @@ ENV_FILE = BASE_DIR / ".env"
 ENV_TEMPLATE_FILE = BASE_DIR / ".env.template"
 ENV_MOCK_FILE = BASE_DIR / ".env.mock"
 
+
+class LogConfig(BaseModel):
+    LOG_DEFAULT_FORMAT: str = (
+        "[%(asctime)s.%(msecs)03d] %(module)10s:%(lineno)-3d %(levelname)-7s - %(message)s"
+    )
+    level: int = logging.INFO
+    datefmt: str = "%Y-%m-%d %H:%M:%S"
 
 class RunConfig(BaseModel):
     host: str = "0.0.0.0"
@@ -118,7 +126,7 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",
         env_prefix="APP_CONFIG__",
     )
-
+    log: LogConfig = LogConfig()
     run: RunConfig = RunConfig()
     db: DatabaseConfig
     db_mock: DatabaseMockConfig
@@ -128,6 +136,6 @@ class Settings(BaseSettings):
     validation: ValidationConfig = (
         ValidationConfig()
     )  # вспомогательные настройки для валидации, в данном случае для валидации пароля
-
+    
 
 settings = Settings()
