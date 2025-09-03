@@ -51,8 +51,8 @@ class ApiPrefixConfig(BaseModel):
 
 
 class AuthJWTConfig(BaseModel):
-    private_key_path: Path = BASE_DIR / "auth" / "certs" / "jwt-private.pem"
-    public_key_path: Path = BASE_DIR / "auth" / "certs" / "jwt-public.pem"
+    private_key_path: Path = BASE_DIR / "auth" / "certs" / "jwt-private.pem" # для подписывания/кодирования токенов
+    public_key_path: Path = BASE_DIR / "auth" / "certs" / "jwt-public.pem" # для декодирования токенов
     algorithm: str = "RS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 30

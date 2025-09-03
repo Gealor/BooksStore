@@ -5,15 +5,8 @@ import uvicorn
 
 from core.config import settings
 from api import router as main_router
+from core.logger import log, log_uvicorn
 
-
-log = logging.getLogger(__name__)
-log_uvicorn = logging.getLogger("uvicorn.error")
-logging.basicConfig(
-    level=settings.log.level,
-    format=settings.log.LOG_DEFAULT_FORMAT,
-    datefmt=settings.log.datefmt,
-)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -12,6 +12,7 @@ from auth.creation_tokens import (
 from auth.passwords import compare_hashed_passwords
 from core.models import db_helper
 from core.schemas.users import UserRead
+from core.logger import log
 from repositories.auth_repository import AuthRepository
 from services.user_service import UserService
 
@@ -54,12 +55,14 @@ def get_jwt_token(
     except (
         ExpiredSignatureError
     ):  # ExpiredSignatureError наследуется от ошибки InvalidTokenError
+        log.error("Token expired. Need to refresh")
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired. Need to refresh"
         )
     except (
         InvalidTokenError
-    ):  # может быть такое что токен содержит меньше сегментов в payload чем расчитано
+    ) as exc:  # может быть такое что токен содержит меньше сегментов в payload чем расчитано
+        log.error("InvalidTokenError: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid to decode token."
         )
