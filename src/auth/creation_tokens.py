@@ -41,6 +41,7 @@ def create_access_token(user: UserRead) -> str:
 
 
 def create_refresh_token(user: UserRead) -> str:
+    # в рефреш токене не хранится динамическая информация, т.е. которая может измениться в будущем.
     jwt_payload = {
         "sub": str(user.id),
     }

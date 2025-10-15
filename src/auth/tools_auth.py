@@ -46,7 +46,7 @@ def validate_auth_user(
 
     return user
 
-
+# TODO: сделать получение токена через request.headers.get("Authorization") или Payload
 def get_jwt_token(
     token: str = Depends(oauth2_schema),
 ) -> dict:
