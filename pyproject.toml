@@ -33,6 +33,8 @@ httpx = "^0.28.1"
 setuptools = "^80.9.0"
 ruff = "^0.12.5"
 types-psycopg2 = "^2.9.21.20250718"
+pytest = "^8.4.2"
+testcontainers = "^4.13.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
