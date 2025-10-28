@@ -88,7 +88,7 @@ def get_user_by_token_type(payload, session) -> UserRead:
     return user
 
 
-def get_current_active_auth_user(
+def validate_user(
     payload: dict = Depends(get_jwt_token),
     session: Session = Depends(db_helper.session_getter),
     dep=Depends(http_bearer),
@@ -97,7 +97,7 @@ def get_current_active_auth_user(
     return get_user_by_token_type(payload, session)
 
 
-def get_current_active_auth_user_for_refresh(
+def validate_user_for_refresh(
     payload: dict = Depends(get_jwt_token),
     session: Session = Depends(db_helper.session_getter),
     dep=Depends(http_bearer),

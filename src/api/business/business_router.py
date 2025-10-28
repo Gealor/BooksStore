@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from auth.tools_auth import get_current_active_auth_user
+from auth.tools_auth import validate_user
 from core.config import settings
 from core.models import db_helper
 from core.schemas.borrowed_books import (
@@ -31,7 +31,7 @@ router = APIRouter(
 def lending_book(
     book_id: int,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> BorrowedBookRead:
     try:
         result = BorrowedBookService(session=session).lending_book(
@@ -64,7 +64,7 @@ def lending_book(
 def return_book(
     borrowed_id: int,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> BorrowedBookUpdate:
     try:
         result = BorrowedBookService(session=session).return_book(

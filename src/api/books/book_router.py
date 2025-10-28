@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from auth.tools_auth import get_current_active_auth_user
+from auth.tools_auth import validate_user
 from core.config import settings
 from core.models import db_helper
 from core.schemas.exceptions import BookNotFoundException, InvalidDataError
@@ -29,7 +29,7 @@ def get_all_books(
 def create_book(
     book_create: BookCreate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> BookRead:
     try:
         book = BookService(session=session).create_book(book_create)
@@ -46,7 +46,7 @@ def update_book_by_id(
     book_id: int,
     book_update: BookUpdate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> BookUpdate:
     try:
         result = BookService(session=session).update_book_by_id(book_id, book_update)
@@ -67,7 +67,7 @@ def update_book_by_id(
 def delete_book_by_id(
     book_id: int,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> BookDelete:
     try:
         result = BookService(session=session).delete_book_by_id(book_id)

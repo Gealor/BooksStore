@@ -2,7 +2,7 @@ from typing import Annotated, Optional, Sequence
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from auth.tools_auth import get_current_active_auth_user
+from auth.tools_auth import validate_user
 from core.models import db_helper
 from core.schemas.borrowed_books import BorrowedBookInfo, BorrowedBookWithDate
 from core.schemas.users import UserBase, UserDelete, UserRead, UserUpdate
@@ -21,7 +21,7 @@ router = APIRouter(prefix=settings.api.users.prefix, tags=["Users"])
 
 @router.get("/me")
 def auth_user_check_self_info(
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> UserBase:
     return {
         "name": user.name,
@@ -32,7 +32,7 @@ def auth_user_check_self_info(
 @router.get("/my-books")
 def get_my_active_books(
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> Sequence[BorrowedBookInfo]:
     try:
         result = UserService(session=session).get_my_active_books(user.id)
@@ -47,7 +47,7 @@ def get_my_active_books(
 @router.get("/history")
 def get_history_books(
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> Sequence[BorrowedBookWithDate]:
     try:
         result = UserService(session=session).get_history_books(user.id)
@@ -63,7 +63,7 @@ def get_history_books(
 def update_user(
     new_data: UserUpdate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> UserUpdate:
     try:
         UserService(session=session).update_user(new_data, user.id)
@@ -78,7 +78,7 @@ def update_user(
 def delete_user(
     user_id: int,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> UserDelete:
     try:
         result = UserService(session=session).delete_user(
@@ -102,7 +102,7 @@ def delete_user(
 @router.delete("/delete-me")
 def delete_self(
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(validate_user),
 ) -> UserDelete:
     try:
         result = UserService(session=session).delete_user(
