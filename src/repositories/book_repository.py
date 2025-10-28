@@ -1,7 +1,7 @@
 from typing import Sequence
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import DatabaseError
+from sqlalchemy.exc import DatabaseError, IntegrityError
 from typing import Protocol
 
 from core.models import Book
@@ -53,7 +53,7 @@ class BookRepositoryAbstract(Protocol):
 
     def update_book_data(
         self,
-        book: Book,
+        book_id: int,
         new_data: dict,
     ) -> None:
         pass
@@ -114,7 +114,7 @@ class BookRepository(BookRepositoryAbstract):
         self._session.add(book)
         try:
             self._session.commit()
-        except DatabaseError:
+        except (DatabaseError, IntegrityError):
             self._session.rollback()
             raise InvalidDataError
         return book
@@ -146,13 +146,14 @@ class BookRepository(BookRepositoryAbstract):
 
     def update_book_data(
         self,
-        book: Book,
+        book_id: int,
         new_data: dict,
     ) -> None:
-        for key, value in new_data.items():
-            setattr(book, key, value)
+        stmt = update(Book).values(**new_data).where(Book.id == book_id)
         try:
-            self._session.commit()
-        except DatabaseError:
+            self._session.execute(stmt)
+        except (DatabaseError, IntegrityError):
             self._session.rollback()
             raise InvalidDataError
+        self._session.commit()
+        
