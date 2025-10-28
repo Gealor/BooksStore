@@ -2,6 +2,9 @@
 1. Рефакторинг тестов и аутентификации/авторизации
 2. Подключение и работа с Redis
 
+# Работа с логгерами uvicorn
+https://stackoverflow.com/questions/77001129/how-to-configure-fastapi-logging-so-that-it-works-both-with-uvicorn-locally-and
+
 Для запуска тестов пропишите в папке проекта(где находятся src и tests) команду pytest
 # Инструкция по запуску
 
