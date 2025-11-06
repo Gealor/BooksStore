@@ -41,12 +41,10 @@ class BookService:
 
     
     def delete_book_by_id(self, book_id: int) -> BookDelete:
-        deleted_id = BookRepository(session=self.session).delete_book_by_id(book_id)
-        if deleted_id is None:
+        result = BookRepository(session=self.session).delete_book_by_id(book_id)
+        if result is None:
             raise BookNotFoundException
-        return {
-            "deleted": deleted_id,
-        }
+        return result
 
     
     def get_book_by_id(self, book_id: int) -> Book | None:

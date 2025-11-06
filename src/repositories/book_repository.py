@@ -1,11 +1,13 @@
+from datetime import datetime
 from typing import Sequence
-from sqlalchemy import select, update
+from sqlalchemy import insert, select, update
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import DatabaseError, IntegrityError
 
 from core.models import Book
-from core.schemas.books import BookCreate
+from core.schemas.books import BookCreate, BookDelete
 from core.schemas.exceptions import InvalidDataError
+from core.logger import log
 
 
 class BookRepository:
@@ -14,8 +16,11 @@ class BookRepository:
 
     def get_all_books(
         self,
+        include_deleted: bool = False,
     ) -> Sequence[Book]:
         stmt = select(Book).order_by(Book.id)
+        if not include_deleted:
+            stmt = stmt.where(Book.deleted_at.is_(None))
 
         result = self._session.scalars(stmt)
         return result.all()
@@ -23,16 +28,22 @@ class BookRepository:
     def get_book_by_id(
         self,
         book_id: int,
+        include_deleted: bool = False,
     ) -> Book | None:
         stmt = select(Book).where(Book.id == book_id)
+        if not include_deleted:
+            stmt = stmt.where(Book.deleted_at.is_(None))
         result = self._session.scalar(stmt)
         return result
 
     def get_books_by_name(
         self,
         book_name: str,
+        include_deleted: bool = False,
     ) -> Sequence[Book] | Book | None:
         stmt = select(Book).where(Book.title == book_name)
+        if not include_deleted:
+            stmt = stmt.where(Book.deleted_at.is_(None))
         result = self._session.scalars(stmt)
 
         return result.all()
@@ -40,8 +51,11 @@ class BookRepository:
     def get_books_by_author(
         self,
         author: str,
+        include_deleted: bool = False,
     ) -> Sequence[Book]:
         stmt = select(Book).where(Book.author == author)
+        if not include_deleted:
+            stmt = stmt.where(Book.deleted_at.is_(None))
         result = self._session.scalars(stmt)
 
         return result.all()
@@ -49,8 +63,11 @@ class BookRepository:
     def get_books_by_isbn(
         self,
         isbn: str,
+        include_deleted: bool = False,
     ) -> Book | None:
         stmt = select(Book).where(Book.ISBN == isbn)
+        if not include_deleted:
+            stmt = stmt.where(Book.deleted_at.is_(None))
         result = self._session.scalar(stmt)
 
         return result
@@ -71,27 +88,16 @@ class BookRepository:
     def delete_book_by_id(
         self,
         book_id: int,
-    ) -> int | None:
-        stmt = select(Book).where(Book.id == book_id)
-        result = self._session.scalars(stmt)
-        book = result.one_or_none()
-        # def debug_session_objects(session):
-        #     print("Session contains:")
-        #     for obj in session.identity_map.values():
-        #         if isinstance(obj, User):
-        #             print("  User in session:", obj.id, "Borrowed books:", [bb.id for bb in obj.borrowed_books])
-        #         elif isinstance(obj, Book):
-        #             print("  Book in session:", obj.id)
-        #         elif isinstance(obj, BorrowedBook):
-        #             print("  BorrowedBook in session:", obj.id, "book_id:", obj.book_id, "reader_id:", obj.reader_id)
+    ) -> BookDelete | None:
+        stmt = update(Book).values(deleted_at = datetime.now()).where(Book.id==book_id).returning(Book.id, Book.deleted_at)
 
-        if book:
-            self._session.delete(book)
-            # debug_session_objects(session)
-            self._session.commit()
-        else:
+        try:
+            result = self._session.execute(stmt).one_or_none()
+        except IntegrityError as e:
+            log.error("Database Exception: %s", e)
             self._session.rollback()
-        return book.id if book else None
+        self._session.commit()
+        return BookDelete(book_id=result.id, deleted_at=result.deleted_at) if result else None 
 
     def update_book_data(
         self,
