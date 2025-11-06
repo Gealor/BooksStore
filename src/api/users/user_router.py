@@ -121,10 +121,12 @@ def delete_self(
 def get_users(
     session: Annotated[Session, Depends(db_helper.session_getter)],
     id: Optional[int] = None,
+    include_deleted: bool = False,
 ) -> list[UserRead] | UserRead:
     try:
         result = UserService(session=session).get_users(
             id=id,
+            include_deleted=include_deleted,
         )
     except ListUsersNotFoundException:
         raise HTTPException(

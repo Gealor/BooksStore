@@ -52,7 +52,7 @@ class UserService:
 
         values_dict = new_data.model_dump(exclude_unset=True)
 
-        repo.update_user_data(found_user, values_dict)
+        repo.update_user_data(user_id, values_dict)
 
     def delete_user(
         self,
@@ -63,21 +63,25 @@ class UserService:
         if raise_self_delete_exc and self_id == user_id:
             raise SelfDeleteException
 
-        deleted_id = UserRepository(session=self.session).delete_user_by_id(user_id)
-        if deleted_id is None:
+        deleted_at = UserRepository(session=self.session).delete_user_by_id(user_id)
+        if deleted_at is None:
             raise UserNotFoundException
 
         return {
-            "deleted": deleted_id,
+            "deleted_at": deleted_at,
         }
 
     def get_users(
         self,
-        id: Optional[int],
+        id: Optional[int] = None,
+        include_deleted: bool = False
     ) -> list[UserRead] | UserRead:
         repo = UserRepository(session=self.session)
 
-        users = repo.get_all_users() if id is None else repo.get_user_by_id(id)
+        users = (
+            repo.get_all_users(include_deleted=include_deleted) 
+            if id is None 
+            else repo.get_user_by_id(user_id=id, include_deleted=include_deleted))
         if users is None:
             raise ListUsersNotFoundException
 
