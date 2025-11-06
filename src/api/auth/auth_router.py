@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 
@@ -7,6 +7,7 @@ from auth.creation_tokens import create_access_token, create_refresh_token
 from auth.tools_auth import authentification_user, validate_user_for_refresh
 from core.models import db_helper
 from core.schemas.auth_info import TokenInfo
+from core.schemas.exceptions import EmailAlreadyExistsException
 from core.schemas.users import UserCreate, UserRead
 from core.config import settings
 from services.user_service import UserService
@@ -19,7 +20,13 @@ def create_user(
     user_create: UserCreate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
 ) -> UserRead:
-    user = UserService(session=session).create_user(user_create)
+    try:
+        user = UserService(session=session).create_user(user_create)
+    except EmailAlreadyExistsException:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="User with this email already exist"
+        )
     return user
 
 
