@@ -1,11 +1,12 @@
 from typing import Optional
 from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from core.models.borrowed_books import BorrowedBook
-
-from core.schemas.exceptions import ListBooksNotFoundException, ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
+from core.schemas.exceptions import EmailAlreadyExistsException, ListBooksNotFoundException, ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
 from core.schemas.users import UserCreate, UserDelete, UserRead, UserUpdate
+from core.logger import log
 from repositories.borrowed_book_repository import BorrowedBookRepository
 from repositories.user_repository import UserRepository
 
@@ -90,5 +91,9 @@ class UserService:
         return UserRead.model_validate(user)
 
     def create_user(self, user_create: UserCreate) -> UserRead:
-        user = UserRepository(session=self.session).create_user(user_create)
+        try:
+            user = UserRepository(session=self.session).create_user(user_create)
+        except IntegrityError as e:
+            log.error("Database Exception: %s", e)
+            raise EmailAlreadyExistsException
         return user
