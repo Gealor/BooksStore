@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from auth.tools_auth import auth_wrapper
 from core.models import db_helper
 from core.schemas.borrowed_books import BorrowedBookInfo, BorrowedBookWithDate
-from core.schemas.exceptions import ListBooksNotFoundException, ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
+from core.schemas.exceptions import EmailAlreadyExistsException, ListBooksNotFoundException, ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
 from core.schemas.users import UserBase, UserDelete, UserRead, UserUpdate
 from core.config import settings
 from services.user_service import UserService
@@ -65,6 +65,10 @@ def update_user(
     except UserNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
+        )
+    except EmailAlreadyExistsException:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="User with this email already exist."
         )
     return new_data
 
