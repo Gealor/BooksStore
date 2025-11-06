@@ -1,17 +1,20 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from core.config import settings
 
 
 class UserBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     name: str = Field(min_length=settings.validation.min_len_name)
     email: EmailStr
 
 
 class UserRead(UserBase):
     id: int
+    deleted_at: datetime | None = None
 
 
 class UserCreate(UserBase):

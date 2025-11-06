@@ -1,10 +1,13 @@
+from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from core.config import settings
 
 
 class BookBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     title: str = Field(min_length=settings.validation.min_len_title)
     author: str = Field(min_length=settings.validation.min_len_name)
     ISBN: Optional[str] = Field(
@@ -47,7 +50,8 @@ class BookUpdate(BaseModel):
 
 
 class BookDelete(BaseModel):
-    deleted: int
+    book_id: int
+    deleted_at: datetime
 
 
 class BookInfo(BaseModel):

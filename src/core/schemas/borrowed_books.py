@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from core.schemas.books import BookInfo
 
 
 class BorrowedBookBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     book_id: int
     reader_id: int
     return_date: Optional[datetime] = None
