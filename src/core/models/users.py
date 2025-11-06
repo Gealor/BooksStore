@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models.base import Base
+from core.models.mixins.deleted_at_mixin import SoftDeleteMixin
 from core.models.mixins.int_id_pk import IntIdPkMixin
 
 
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
     from .borrowed_books import BorrowedBook
 
 
-class User(IntIdPkMixin, Base):
+class User(IntIdPkMixin, SoftDeleteMixin, Base):
     __tablename__ = "users"
 
     name: Mapped[str] = mapped_column(nullable=False)
