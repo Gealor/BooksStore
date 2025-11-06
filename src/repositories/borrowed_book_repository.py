@@ -1,10 +1,11 @@
 from typing import Sequence
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, update
 from sqlalchemy.orm import selectinload, Session
+from sqlalchemy.exc import IntegrityError
 
 from core.models.borrowed_books import BorrowedBook
 from core.schemas.borrowed_books import BorrowedBookCreate, BorrowedBookUpdate
-
+from core.logger import log
 
 class BorrowedBookRepository:
     def __init__(self, session: Session):
@@ -89,11 +90,14 @@ class BorrowedBookRepository:
 
     def update_borrowed_book_record(
         self,
-        record: BorrowedBook,
+        record_id: BorrowedBook,
         record_update: BorrowedBookUpdate,
     ) -> None:
-        update = record_update.model_dump(exclude_defaults=False, exclude_unset=False)
-        for key, value in update.items():
-            setattr(record, key, value)
-
+        update_data = record_update.model_dump(exclude_defaults=False, exclude_unset=False)
+        stmt = update(BorrowedBook).values(**update_data).where(BorrowedBook.id == record_id)
+        try:
+            self._session.execute(stmt)
+        except IntegrityError as e:
+            log.error("Database Exception: %s", e)
+            self._session.rollback()
         self._session.commit()
