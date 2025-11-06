@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from auth import hash_password
 from core.models import User
 from core.logger import log
+from core.schemas.exceptions import EmailAlreadyExistsException
 from core.schemas.users import UserCreate
 
 
@@ -53,7 +54,11 @@ class UserRepository:
         self,
         user_id: int,
     ) -> datetime | None:
-        stmt = update(User).values(deleted_at=datetime.now()).where(User.id == user_id).returning(User.deleted_at)
+        stmt = (
+            update(User).values(deleted_at=datetime.now())
+            .where(User.id == user_id, User.deleted_at.is_(None))
+            .returning(User.deleted_at)
+        )
         try:
             result = self._session.execute(stmt)
             deleted_at = result.scalar_one_or_none()
@@ -73,7 +78,8 @@ class UserRepository:
         try:
             stmt = update(User).values(**new_data).where(User.id == user_id)
             self._session.execute(stmt)
-        except IntegrityError as e:
+        except (IntegrityError) as e:
             log.error("Database Exception: %s", e)
             self._session.rollback()
+            raise EmailAlreadyExistsException
         self._session.commit()
