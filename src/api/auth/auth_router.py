@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 
 from auth.creation_tokens import create_access_token, create_refresh_token
-from auth.tools_auth import validate_auth_user, validate_user_for_refresh
+from auth.tools_auth import authentification_user, validate_user_for_refresh
 from core.models import db_helper
 from core.schemas.auth_info import TokenInfo
 from core.schemas.users import UserCreate, UserRead
@@ -24,7 +24,7 @@ def create_user(
 
 
 @router.post("/login")
-def auth_user_jwt(user: UserRead = Depends(validate_auth_user)) -> TokenInfo:
+def auth_user_jwt(user: UserRead = Depends(authentification_user)) -> TokenInfo:
     access_token = create_access_token(user)
     refresh_token = create_refresh_token(user)
     return TokenInfo(

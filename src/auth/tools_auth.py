@@ -25,7 +25,7 @@ unauthed_exc = HTTPException(
 )
 
 
-def validate_auth_user(
+def authentification_user(
     email: str = Form(
         description="Enter the email you used to register."
     ),  # указывается именно username из-за особенности реализации OAuth2PasswordBearer, который использует OAuth2PasswordRequestForm в качестве зависимости,
@@ -97,7 +97,7 @@ def get_user_by_token_type(payload, session) -> UserRead:
     return user
 
 
-def validate_user(
+def auth_wrapper(
     payload: dict = Depends(get_info_from_jwt),
     session: Session = Depends(db_helper.session_getter),
     dep=Depends(http_bearer),
