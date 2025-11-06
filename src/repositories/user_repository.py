@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Sequence
 from sqlalchemy import select, update
-from sqlalchemy.orm import selectinload, Session
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 
