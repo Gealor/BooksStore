@@ -1,4 +1,4 @@
-from typing import Protocol, Sequence
+from typing import Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload, Session
 
@@ -8,37 +8,7 @@ from core.models import User
 from core.schemas.users import UserCreate
 
 
-class UserRepositoryAbstract(Protocol):
-    def get_all_users(self) -> Sequence[User]:
-        pass
-
-    def get_user_by_id(
-        self,
-        user_id: int,
-    ) -> User | None:
-        pass
-
-    def create_user(
-        self,
-        user_create: UserCreate,
-    ) -> User:
-        pass
-
-    def delete_user_by_id(
-        self,
-        user_id: int,
-    ) -> int | None:
-        pass
-
-    def update_user_data(
-        self,
-        user: User,
-        new_data: dict,
-    ) -> None:
-        pass
-
-
-class UserRepository(UserRepositoryAbstract):
+class UserRepository:
     def __init__(self, session: Session):
         self._session = session
 

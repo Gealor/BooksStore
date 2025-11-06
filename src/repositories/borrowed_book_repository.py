@@ -1,4 +1,4 @@
-from typing import Protocol, Sequence
+from typing import Sequence
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload, Session
 
@@ -6,49 +6,7 @@ from core.models.borrowed_books import BorrowedBook
 from core.schemas.borrowed_books import BorrowedBookCreate, BorrowedBookUpdate
 
 
-class BorrowedBookRepositoryAbstract(Protocol):
-    def get_all_borrowed_books(self) -> Sequence[BorrowedBook]:
-        pass
-
-    def get_borrowed_book_by_id(
-        self,
-        record_id: int,
-    ) -> BorrowedBook | None:
-        pass
-
-    def get_history_about_books_by_user_id(
-        self,
-        user_id: int,
-    ) -> Sequence[BorrowedBook]:
-        pass
-
-    def get_active_borrowed_books_by_user_id(
-        self,
-        user_id: int,
-    ) -> Sequence[BorrowedBook]:
-        pass
-
-    def create_borrowed_book_record(
-        self,
-        record_create: BorrowedBookCreate,
-    ) -> BorrowedBook:
-        pass
-
-    def delete_borrowed_book_record(
-        self,
-        record_id: int,
-    ) -> int | None:
-        pass
-
-    def update_borrowed_book_record(
-        self,
-        record: BorrowedBook,
-        record_update: BorrowedBookUpdate,
-    ) -> None:
-        pass
-
-
-class BorrowedBookRepository(BorrowedBookRepositoryAbstract):
+class BorrowedBookRepository:
     def __init__(self, session: Session):
         self._session = session
 
