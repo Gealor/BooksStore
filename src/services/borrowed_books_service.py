@@ -22,9 +22,9 @@ class BorrowedBookService:
         borrowed_books_user = repo.get_active_borrowed_books_by_user_id(user_id=user_id)
         if len(borrowed_books_user) == settings.business.max_active_books:
             raise MaxNumberBorrowedBooksException
-        record = repo.create_borrowed_book_record(book_id=book_id, reader_id=user_id)
         BookService(session=self.session).reduce_number_of_copies(book_id=book_id)
-
+        record = repo.create_borrowed_book_record(book_id=book_id, reader_id=user_id)
+        
         return record
 
     
@@ -43,15 +43,14 @@ class BorrowedBookService:
         if borrowed_book.return_date is not None:
             raise BookAlreadyReturnException
 
-        new_data = BorrowedBookUpdate()
-
-        repo.update_borrowed_book_record(
-            record=borrowed_book,
-            record_update=new_data,
-        )
-
         BookService(session=self.session).increase_number_of_copies(
             book_id=borrowed_book.book_id,
+        )
+
+        new_data = BorrowedBookUpdate()
+        repo.update_borrowed_book_record(
+            record_id=borrowed_book.id,
+            record_update=new_data,
         )
 
         return new_data
