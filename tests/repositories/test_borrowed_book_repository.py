@@ -81,6 +81,6 @@ def test_update_borrowed_book_record(borrowed_book_repo, update_record, mock_rec
 
     assert result.return_date is None
 
-    borrowed_book_repo.update_borrowed_book_record(result, update_record)
+    borrowed_book_repo.update_borrowed_book_record(result.id, update_record)
 
     assert result.return_date is not None

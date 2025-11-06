@@ -68,10 +68,10 @@ def test_delete_book_by_id(book_repo, mock_books, create_book):
 
     assert book is not None
 
-    deleted_book_id = book_repo.delete_book_by_id(book_id=mock_books[0].id)
+    deleted_book = book_repo.delete_book_by_id(book_id=mock_books[0].id)
 
-    assert deleted_book_id is not None
-    assert deleted_book_id == book.id
+    assert deleted_book is not None
+    assert deleted_book.book_id == book.id
     
     book = book_repo.get_book_by_id(book_id=mock_books[0].id)
     assert book is None

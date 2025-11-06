@@ -70,7 +70,7 @@ def test_update_user(user_repo, mock_users, update_user):
     assert result is not None
     assert result.id == mock_users[0].id
 
-    user_repo.update_user_data(user=result, new_data=update_user)
+    user_repo.update_user_data(user_id=result.id, new_data=update_user)
     updated_result = user_repo.get_user_by_id(user_id=mock_users[0].id)
 
     assert updated_result is not None

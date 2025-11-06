@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 import pytest
 from core.models.borrowed_books import BorrowedBook
-from core.models.exceptions.book import ListBooksNotFoundException
-from core.models.exceptions.user import ListUsersNotFoundException
+from core.schemas.exceptions import ListBooksNotFoundException, UserNotFoundException
+from core.schemas.exceptions import ListUsersNotFoundException
+from core.schemas.users import UserRead
 from repositories.user_repository import UserRepository
 from services.user_service import UserService
 
@@ -60,39 +61,44 @@ def mock_history_books():
     ]
 
 
-@pytest.mark.parametrize("user_id", [None, 5])
-def test_get_users(user_service: UserService, mock_user_repo, mock_users_list, user_id: int | None):
+def test_get_users(user_service: UserService, mock_user_repo, mock_users_list):
     mock_user_repo.get_all_users.return_value = mock_users_list
-    if user_id:
+
+    result = user_service.get_users()
+    assert len(result) == len(mock_users_list)
+    mock_user_repo.get_all_users.assert_called_once()
+
+
+
+def test_get_users_empty(user_service: UserService, mock_user_repo):
+    mock_user_repo.get_all_users.return_value = None
+
+    with pytest.raises(ListUsersNotFoundException):
+        user_service.get_users()
+
+    mock_user_repo.get_all_users.assert_called_once() 
+
+
+@pytest.mark.parametrize("user_id", [5, 4, 3])
+def test_get_user_by_id(user_service: UserService, mock_user_repo, mock_users_list, user_id: int):
         mock_user_repo.get_user_by_id.return_value = mock_users_list[user_id-1]
 
-    result = user_service.get_users(id=user_id)
-    if not user_id:
-        assert len(result) == len(mock_users_list)
-        mock_user_repo.get_all_users.assert_called_once()
-    else:
+        result = user_service.get_user_by_id(id=user_id)
+        assert result is not None
         assert result.id == user_id
         assert result.name == mock_users_list[user_id-1].name
         assert result.email == mock_users_list[user_id-1].email
-        assert result.password == mock_users_list[user_id-1].password
-        mock_user_repo.get_user_by_id.assert_called_once_with(user_id)
+        mock_user_repo.get_user_by_id.assert_called_once_with(user_id=user_id, include_deleted=False)
 
 
-@pytest.mark.parametrize("user_id", [None, 7])
-def test_get_users_empty(user_service: UserService, mock_user_repo, user_id: int | None):
-    mock_user_repo.get_all_users.return_value = None
-    if user_id:
-        mock_user_repo.get_user_by_id.return_value = None
+def test_get_user_by_id_empty(user_service: UserService, mock_user_repo):
+    mock_user_repo.get_user_by_id.return_value = None
 
-    with pytest.raises(ListUsersNotFoundException):
-        user_service.get_users(id=user_id)
-    (
-        mock_user_repo.get_all_users.assert_called_once() 
-        if not user_id
-        else mock_user_repo.get_user_by_id.assert_called_once_with(user_id)
-    )
+    with pytest.raises(UserNotFoundException):
+        user_service.get_user_by_id(id=4)
+    mock_user_repo.get_user_by_id.assert_called_once_with(user_id=4, include_deleted=False)
 
-
+    
 def test_get_my_active_books(user_service: UserService, mock_borrowed_books_repo, mock_my_active_books, user_id = 7):
     mock_borrowed_books_repo.get_active_borrowed_books_by_user_id.return_value = mock_my_active_books
 
