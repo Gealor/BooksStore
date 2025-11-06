@@ -25,7 +25,7 @@ def get_all_books(
     return books
 
 
-@router.post("/add-book")
+@router.post("/add")
 def create_book(
     book_create: BookCreate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
@@ -41,7 +41,7 @@ def create_book(
     return book
 
 
-@router.patch("/update-book")
+@router.patch("/update")
 def update_book_by_id(
     book_id: int,
     book_update: BookUpdate,
@@ -63,7 +63,7 @@ def update_book_by_id(
     return result
 
 
-@router.delete("/delete-book")
+@router.delete("/delete")
 def delete_book_by_id(
     book_id: int,
     session: Annotated[Session, Depends(db_helper.session_getter)],
