@@ -52,3 +52,7 @@ class BaseBooksException(Exception):
 
 class ListBooksNotFoundException(BaseBooksException):
     pass
+
+
+class EmailAlreadyExistsException(Exception):
+    pass
