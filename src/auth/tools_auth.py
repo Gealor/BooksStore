@@ -11,6 +11,7 @@ from auth.creation_tokens import (
 )
 from auth.passwords import compare_hashed_passwords
 from core.models import db_helper
+from core.schemas.exceptions import UserNotFoundException
 from core.schemas.users import UserRead
 from core.logger import log
 from repositories.auth_repository import AuthRepository
@@ -89,11 +90,14 @@ def validate_token_type(payload: dict, token_type_: str):
 
 def get_user_by_token_type(payload, session) -> UserRead:
     id: int | None = int(payload.get("sub"))
-    if not (user := UserService(session=session).get_users(id)):
+    try:
+        user = UserService(session=session).get_user_by_id(id)
+    except UserNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail="Invalid token. User not exist.",
         )
+
     return user
 
 
