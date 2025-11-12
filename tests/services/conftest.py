@@ -58,3 +58,5 @@ def user_service():
     service = UserService(session=session_mock)
 
     return service
+
+# TODO: добавить тесты для сервисов Book и BorrowedBooks
