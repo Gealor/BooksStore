@@ -10,7 +10,10 @@ from testcontainers.postgres import PostgresContainer
 
 @pytest.fixture(scope="session")
 def postgres_container() -> Generator[PostgresContainer, None, None]:
-    with PostgresContainer("postgres:15") as postgres:
+    with PostgresContainer(
+        "postgres:15"
+        # "postgis/postgis:15-3.3"
+    ) as postgres:
         yield postgres
 
 

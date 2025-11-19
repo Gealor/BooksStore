@@ -1,6 +1,6 @@
-__all__ = ("db_helper", "Base", "User", "Book", "db_helper_mock")
+__all__ = ("db_helper", "Base", "User", "Book")
 
-from .db_helper import db_helper, db_helper_mock
+from .db_helper import db_helper
 from .base import Base
 from .users import User
 from .books import Book
