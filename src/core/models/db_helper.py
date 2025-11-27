@@ -25,7 +25,8 @@ class DatabaseHelper:
             bind=self.engine,
             autoflush=False,
             autocommit=False,
-            expire_on_commit=False,
+            expire_on_commit=False, # если False, то после commit не помечает объекты в памяти, участвовавшие в транзакции как "протухшие", 
+            # соответственно есть риск работы со старыми/неактуальными значениями
         )
 
     # асинхронное отключение соединения от базы данных
