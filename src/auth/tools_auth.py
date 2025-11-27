@@ -63,7 +63,7 @@ def get_info_from_jwt(
     try:
         payload = decode_jwt(jwt_token=token)
     except (
-        ExpiredSignatureError
+        ExpiredSignatureError # если токен протух
     ):  # ExpiredSignatureError наследуется от ошибки InvalidTokenError
         log.error("Token expired. Need to refresh")
         raise HTTPException(
