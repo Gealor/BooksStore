@@ -48,7 +48,7 @@ def authentification_user(
 
 def get_jwt_token(request: Request) -> str:
     token = request.headers.get("Authorization")
-    if token.startswith("Bearer"):
+    if token and token.startswith("Bearer"):
         token = token[7:]
     return token
 
