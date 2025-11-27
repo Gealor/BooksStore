@@ -88,6 +88,8 @@ def validate_token_type(payload: dict, token_type_: str):
         )
 
 
+# Можно (и желательно), не ходить в базу данных, а ориентироваться только на процесс декодирования access токена, 
+# если во время него произошла ошибка, значит либо токен протух, либо что-то не так в его сигнатуре
 def get_user_by_token_type(payload, session) -> UserRead:
     id: int | None = int(payload.get("sub"))
     try:
