@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import asynccontextmanager
 import logging
 from fastapi import FastAPI
 import uvicorn

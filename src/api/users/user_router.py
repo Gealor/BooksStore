@@ -2,17 +2,12 @@ from typing import Annotated, Optional, Sequence
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from auth.tools_auth import get_current_active_auth_user
+from auth.tools_auth import auth_wrapper
 from core.models import db_helper
 from core.schemas.borrowed_books import BorrowedBookInfo, BorrowedBookWithDate
+from core.schemas.exceptions import EmailAlreadyExistsException, ListBooksNotFoundException, ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
 from core.schemas.users import UserBase, UserDelete, UserRead, UserUpdate
 from core.config import settings
-from core.models.exceptions.book import ListBooksNotFoundException
-from core.models.exceptions.user import (
-    ListUsersNotFoundException,
-    SelfDeleteException,
-    UserNotFoundException,
-)
 from services.user_service import UserService
 
 
@@ -21,7 +16,7 @@ router = APIRouter(prefix=settings.api.users.prefix, tags=["Users"])
 
 @router.get("/me")
 def auth_user_check_self_info(
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> UserBase:
     return {
         "name": user.name,
@@ -29,10 +24,10 @@ def auth_user_check_self_info(
     }
 
 
-@router.get("/my-books")
+@router.get("/my_books")
 def get_my_active_books(
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> Sequence[BorrowedBookInfo]:
     try:
         result = UserService(session=session).get_my_active_books(user.id)
@@ -47,7 +42,7 @@ def get_my_active_books(
 @router.get("/history")
 def get_history_books(
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> Sequence[BorrowedBookWithDate]:
     try:
         result = UserService(session=session).get_history_books(user.id)
@@ -59,11 +54,11 @@ def get_history_books(
     return result
 
 
-@router.patch("/update-info")
+@router.patch("/update")
 def update_user(
     new_data: UserUpdate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> UserUpdate:
     try:
         UserService(session=session).update_user(new_data, user.id)
@@ -71,14 +66,18 @@ def update_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
         )
+    except EmailAlreadyExistsException:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="User with this email already exist."
+        )
     return new_data
 
 
-@router.delete("/delete-user")
+@router.delete("/delete")
 def delete_user(
     user_id: int,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> UserDelete:
     try:
         result = UserService(session=session).delete_user(
@@ -99,10 +98,10 @@ def delete_user(
     return result
 
 
-@router.delete("/delete-me")
+@router.delete("/delete_self")
 def delete_self(
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> UserDelete:
     try:
         result = UserService(session=session).delete_user(
@@ -117,18 +116,36 @@ def delete_self(
     return result
 
 
-@router.get("/find-users")
+@router.get("/users")
 def get_users(
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    id: Optional[int] = None,
+    include_deleted: bool = False,
 ) -> list[UserRead] | UserRead:
     try:
         result = UserService(session=session).get_users(
-            id=id,
+            include_deleted=include_deleted,
         )
     except ListUsersNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Users not found" if id is None else "User not found",
+            detail="Users not found",
+        )
+    return result
+
+@router.get("/user/{user_id}")
+def get_user_by_id(
+    session: Annotated[Session, Depends(db_helper.session_getter)],
+    user_id: int,
+    include_deleted: bool = False,
+) -> UserRead:
+    try:
+        result = UserService(session=session).get_user_by_id(
+            id=user_id,
+            include_deleted=include_deleted
+        )
+    except UserNotFoundException:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
     return result

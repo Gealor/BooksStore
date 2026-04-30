@@ -25,7 +25,8 @@ class DatabaseHelper:
             bind=self.engine,
             autoflush=False,
             autocommit=False,
-            expire_on_commit=False,
+            expire_on_commit=False, # если False, то после commit не помечает объекты в памяти, участвовавшие в транзакции как "протухшие", 
+            # соответственно есть риск работы со старыми/неактуальными значениями
         )
 
     # асинхронное отключение соединения от базы данных
@@ -40,14 +41,6 @@ class DatabaseHelper:
 
 db_helper = DatabaseHelper(
     url=settings.db.get_db_url(),
-    echo=settings.db.echo,
-    echo_pool=settings.db.echo_pool,
-    pool_size=settings.db.pool_size,
-    max_overflow=settings.db.max_overflow,
-)
-
-db_helper_mock = DatabaseHelper(
-    url=settings.db_mock.get_db_url(),
     echo=settings.db.echo,
     echo_pool=settings.db.echo_pool,
     pool_size=settings.db.pool_size,

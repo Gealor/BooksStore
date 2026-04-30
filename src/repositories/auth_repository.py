@@ -20,11 +20,11 @@ class AuthRepository:
 
         return result.first()
 
-    def get_data_by_email(
+    def get_user_by_email(
         self,
         username: str,
     ) -> UserLoginInfo | None:
-        stmt = select(User).where(User.email == username)
+        stmt = select(User).where(User.email == username, User.deleted_at.is_(None))
         result = self._session.scalar(stmt)
 
         return result

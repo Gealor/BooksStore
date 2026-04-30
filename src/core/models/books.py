@@ -4,13 +4,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.models.base import Base
 from core.models.borrowed_books import BorrowedBook
+from core.models.mixins.deleted_at_mixin import SoftDeleteMixin
 from core.models.mixins.int_id_pk import IntIdPkMixin
 
 if TYPE_CHECKING:
     from .borrowed_books import BorrowedBook
 
 
-class Book(IntIdPkMixin, Base):
+class Book(IntIdPkMixin, SoftDeleteMixin, Base):
     __tablename__ = "books"
 
     title: Mapped[str] = mapped_column(nullable=False)

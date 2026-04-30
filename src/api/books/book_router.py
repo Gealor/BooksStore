@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from auth.tools_auth import get_current_active_auth_user
+from auth.tools_auth import auth_wrapper
 from core.config import settings
 from core.models import db_helper
 from core.schemas.exceptions import BookNotFoundException, InvalidDataError
@@ -25,11 +25,11 @@ def get_all_books(
     return books
 
 
-@router.post("/add-book")
+@router.post("/add")
 def create_book(
     book_create: BookCreate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> BookRead:
     try:
         book = BookService(session=session).create_book(book_create)
@@ -41,12 +41,12 @@ def create_book(
     return book
 
 
-@router.patch("/update-book")
+@router.patch("/update")
 def update_book_by_id(
     book_id: int,
     book_update: BookUpdate,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> BookUpdate:
     try:
         result = BookService(session=session).update_book_by_id(book_id, book_update)
@@ -63,11 +63,11 @@ def update_book_by_id(
     return result
 
 
-@router.delete("/delete-book")
+@router.delete("/delete")
 def delete_book_by_id(
     book_id: int,
     session: Annotated[Session, Depends(db_helper.session_getter)],
-    user: UserRead = Depends(get_current_active_auth_user),
+    user: UserRead = Depends(auth_wrapper),
 ) -> BookDelete:
     try:
         result = BookService(session=session).delete_book_by_id(book_id)

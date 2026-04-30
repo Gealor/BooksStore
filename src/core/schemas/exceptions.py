@@ -28,3 +28,31 @@ class UserMissingBookException(Exception):
 
 class BookAlreadyReturnException(Exception):
     pass
+
+
+class BaseUserException(Exception):
+    pass
+
+
+class UserNotFoundException(BaseUserException):
+    pass
+
+
+class SelfDeleteException(BaseUserException):
+    pass
+
+
+class ListUsersNotFoundException(BaseUserException):
+    pass
+
+
+class BaseBooksException(Exception):
+    pass
+
+
+class ListBooksNotFoundException(BaseBooksException):
+    pass
+
+
+class EmailAlreadyExistsException(Exception):
+    pass

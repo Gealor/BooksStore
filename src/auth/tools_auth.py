@@ -1,4 +1,4 @@
-from fastapi import Depends, Form, HTTPException, status
+from fastapi import Depends, Form, HTTPException, Request, status
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
@@ -11,6 +11,7 @@ from auth.creation_tokens import (
 )
 from auth.passwords import compare_hashed_passwords
 from core.models import db_helper
+from core.schemas.exceptions import UserNotFoundException
 from core.schemas.users import UserRead
 from core.logger import log
 from repositories.auth_repository import AuthRepository
@@ -19,24 +20,23 @@ from services.user_service import UserService
 # чтобы в документации появилось поле для ввода токена
 http_bearer = HTTPBearer(auto_error=False)  # чтобы не выбрасывал ошибку автоматически
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-
 unauthed_exc = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Invalid username or password",
 )
 
 
-def validate_auth_user(
-    username: str = Form(
+def authentification_user(
+    email: str = Form(
         description="Enter the email you used to register."
     ),  # указывается именно username из-за особенности реализации OAuth2PasswordBearer, который использует OAuth2PasswordRequestForm в качестве зависимости,
     # внутри же OAuth2PasswordRequestForm содержит поля username и password и никаких других
     password: str = Form(),
     session: Session = Depends(db_helper.session_getter),
 ):
-    if not (user := AuthRepository(session=session).get_data_by_email(username)):
+    if not (user := AuthRepository(session=session).get_user_by_email(email)):
         raise unauthed_exc
+    
 
     if not compare_hashed_passwords(
         password.encode("utf-8"),
@@ -46,14 +46,24 @@ def validate_auth_user(
 
     return user
 
-# TODO: сделать получение токена через request.headers.get("Authorization") или Payload
-def get_jwt_token(
-    token: str = Depends(oauth2_schema),
+def get_jwt_token(request: Request) -> str:
+    token = request.headers.get("Authorization")
+    if token and token.startswith("Bearer"):
+        token = token[7:]
+    return token
+
+# TODO: сделать получение токена через request.headers.get("Authorization") или Payload (СДЕЛАНО)
+def get_info_from_jwt(
+    token: str = Depends(get_jwt_token),
 ) -> dict:
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not exists Authorization info."
+        )
     try:
         payload = decode_jwt(jwt_token=token)
     except (
-        ExpiredSignatureError
+        ExpiredSignatureError # если токен протух
     ):  # ExpiredSignatureError наследуется от ошибки InvalidTokenError
         log.error("Token expired. Need to refresh")
         raise HTTPException(
@@ -78,18 +88,23 @@ def validate_token_type(payload: dict, token_type_: str):
         )
 
 
+# Можно (и желательно), не ходить в базу данных, а ориентироваться только на процесс декодирования access токена, 
+# если во время него произошла ошибка, значит либо токен протух, либо что-то не так в его сигнатуре
 def get_user_by_token_type(payload, session) -> UserRead:
     id: int | None = int(payload.get("sub"))
-    if not (user := UserService(session=session).get_users(id)):
+    try:
+        user = UserService(session=session).get_user_by_id(id)
+    except UserNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail="Invalid token. User not exist.",
         )
+
     return user
 
 
-def get_current_active_auth_user(
-    payload: dict = Depends(get_jwt_token),
+def auth_wrapper(
+    payload: dict = Depends(get_info_from_jwt),
     session: Session = Depends(db_helper.session_getter),
     dep=Depends(http_bearer),
 ) -> UserRead:
@@ -97,8 +112,8 @@ def get_current_active_auth_user(
     return get_user_by_token_type(payload, session)
 
 
-def get_current_active_auth_user_for_refresh(
-    payload: dict = Depends(get_jwt_token),
+def validate_user_for_refresh(
+    payload: dict = Depends(get_info_from_jwt),
     session: Session = Depends(db_helper.session_getter),
     dep=Depends(http_bearer),
 ) -> UserRead:

@@ -1,15 +1,12 @@
 from typing import Optional
 from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from core.models.borrowed_books import BorrowedBook
-from core.models.exceptions.book import ListBooksNotFoundException
-from core.models.exceptions.user import (
-    ListUsersNotFoundException,
-    SelfDeleteException,
-    UserNotFoundException,
-)
+from core.schemas.exceptions import EmailAlreadyExistsException, ListBooksNotFoundException, ListUsersNotFoundException, SelfDeleteException, UserNotFoundException
 from core.schemas.users import UserCreate, UserDelete, UserRead, UserUpdate
+from core.logger import log
 from repositories.borrowed_book_repository import BorrowedBookRepository
 from repositories.user_repository import UserRepository
 
@@ -52,7 +49,7 @@ class UserService:
 
         values_dict = new_data.model_dump(exclude_unset=True)
 
-        repo.update_user_data(found_user, values_dict)
+        repo.update_user_data(user_id, values_dict)
 
     def delete_user(
         self,
@@ -63,26 +60,40 @@ class UserService:
         if raise_self_delete_exc and self_id == user_id:
             raise SelfDeleteException
 
-        deleted_id = UserRepository(session=self.session).delete_user_by_id(user_id)
-        if deleted_id is None:
+        deleted_at = UserRepository(session=self.session).delete_user_by_id(user_id)
+        if deleted_at is None:
             raise UserNotFoundException
 
         return {
-            "deleted": deleted_id,
+            "deleted_at": deleted_at,
         }
 
     def get_users(
         self,
-        id: Optional[int],
-    ) -> list[UserRead] | UserRead:
+        include_deleted: bool = False
+    ) -> Sequence[UserRead] | UserRead:
         repo = UserRepository(session=self.session)
 
-        users = repo.get_all_users() if id is None else repo.get_user_by_id(id)
+        users = repo.get_all_users(include_deleted=include_deleted) 
         if users is None:
             raise ListUsersNotFoundException
-
-        return users
+        return [UserRead.model_validate(user) for user in users]
+    
+    def get_user_by_id(
+        self,
+        id: int,
+        include_deleted: bool = False
+    ) -> UserRead:
+        user = UserRepository(session=self.session).get_user_by_id(user_id=id, include_deleted=include_deleted)
+        if user is None:
+            raise UserNotFoundException
+        
+        return UserRead.model_validate(user)
 
     def create_user(self, user_create: UserCreate) -> UserRead:
-        user = UserRepository(session=self.session).create_user(user_create)
+        try:
+            user = UserRepository(session=self.session).create_user(user_create)
+        except IntegrityError as e:
+            log.error("Database Exception: %s", e)
+            raise EmailAlreadyExistsException
         return user

@@ -35,18 +35,16 @@ class BookService:
             raise BookNotFoundException
 
         values_dict = book_update.model_dump(exclude_unset=True)
-        repo.update_book_data(found_book, values_dict)
+        repo.update_book_data(found_book.id, values_dict)
 
         return book_update
 
     
     def delete_book_by_id(self, book_id: int) -> BookDelete:
-        deleted_id = BookRepository(session=self.session).delete_book_by_id(book_id)
-        if deleted_id is None:
+        result = BookRepository(session=self.session).delete_book_by_id(book_id)
+        if result is None:
             raise BookNotFoundException
-        return {
-            "deleted": deleted_id,
-        }
+        return result
 
     
     def get_book_by_id(self, book_id: int) -> Book | None:
@@ -66,7 +64,7 @@ class BookService:
 
         new_data = {"number_copies": book.number_copies - 1}
         try:
-            repo.update_book_data(book=book, new_data=new_data)
+            repo.update_book_data(book_id=book.id, new_data=new_data)
         except InvalidDataError:
             raise ReduceNumberOfCopiesException
 
@@ -80,6 +78,6 @@ class BookService:
 
         new_data = {"number_copies": book.number_copies + 1}
         try:
-            repo.update_book_data(book=book, new_data=new_data)
+            repo.update_book_data(book_id=book.id, new_data=new_data)
         except InvalidDataError:
             raise IncreaseNumberOfCopiesException
