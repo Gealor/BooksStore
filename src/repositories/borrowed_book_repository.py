@@ -90,7 +90,7 @@ class BorrowedBookRepository:
 
     def update_borrowed_book_record(
         self,
-        record_id: BorrowedBook,
+        record_id: int,
         record_update: BorrowedBookUpdate,
     ) -> None:
         update_data = record_update.model_dump(exclude_defaults=False, exclude_unset=False)

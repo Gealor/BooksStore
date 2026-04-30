@@ -28,8 +28,8 @@ def create_jwt(
 def create_access_token(user: UserRead) -> str:
     jwt_payload = {
         "sub": str(user.id),
-        "name": user.name,
-        "email": user.email,
+        "name": user.name, # # лучше не хранить чувствительные данные пользователя в JWT-токенах
+        "email": user.email, # лучше не хранить чувствительные данные пользователя в JWT-токенах
     }
 
     access_token = create_jwt(
